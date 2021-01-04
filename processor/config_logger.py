@@ -33,8 +33,8 @@ config = {
             'level':     'ERROR',
             'formatter': 'detailed',
             'mailhost': 'mailer.itc.nps.gov',
-            'fromaddr': 'regan_sarwas@nps.gov',
-            'toaddrs':  ['regan_sarwas@nps.gov'],
+            'fromaddr': 'akro_gis_helpdesk@nps.gov',
+            'toaddrs':  ['akro_gis_helpdesk@nps.gov'],
             'subject':  'Error running Robocopy Log Processor'
         },
         'sqlite': {
