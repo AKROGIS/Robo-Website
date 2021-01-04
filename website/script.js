@@ -1,4 +1,4 @@
-// NOTE: all dates in this code are ISO formated date strings (YYYY-MM-DD) in local time.
+// NOTE: all dates in this code are ISO formatted date strings (YYYY-MM-DD) in local time.
 //      in the few cases where a javascript date object is needed it is called dateObj
 
 // The name of the server with the data for this page
@@ -65,7 +65,7 @@ function pad2 (n) {
   return n < 10 ? '0' + n : n
 }
 
-// Produce a short ISO formated date from a date object
+// Produce a short ISO formatted date from a date object
 function isoDateFormat (dateObj) {
   return (
     dateObj.getFullYear() +
@@ -76,7 +76,7 @@ function isoDateFormat (dateObj) {
   )
 }
 
-// Produce a date object from a short ISO formated date
+// Produce a date object from a short ISO formatted date
 // It is flexible in that zero padding is not required, and month/day default to Jan/1
 // an invalid date will result in today's date being returned
 function dateFromIso (str) {

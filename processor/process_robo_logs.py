@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 """
-Reads the log files from robocopy and summerizes them in a database
+Reads the log files from robocopy and summarizes them in a database
 Emails an admin when issues are found in the log file
 """
 
@@ -174,7 +174,7 @@ def process_park(file_name):
                         saved_error = None  # this will only be non null when saved_error['message'] == error['message']
                         results['errors'].append(error)
                     else: # error is retrying
-                        # if not saved_error then saved_error['message'] == error['message'], so assigment is redundant but harmless
+                        # if not saved_error then saved_error['message'] == error['message'], so assignment is redundant but harmless
                         saved_error = error
                         error_line_num = line_num
                         # Options for what comes next:
