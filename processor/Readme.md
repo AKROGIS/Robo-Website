@@ -1,18 +1,18 @@
 # Robocopy Log Processor
 
-This process is intended to be run a scheduled task to
+This process is intended to be run as scheduled task to
 summarize the several nightly robocopy log files into a database.
 
 ## `processor/BufferingSMTPHandler.py`
 
 A python 2.7 file to provide the logging service with the
 ability to bundle multiple log messages into a single email.
-`import`ed by `config_file.py`
+`import`ed by `config_logger.py`
 
 ## `processor/config_logger.py`
 
-A python 2.7 file with the log configuration object which defines the how
-log messages are formatted, and where the various log levels are written.
+A python 2.7 file with a log configuration object that defines the how log
+messages are formatted and where the messages at various log levels are written.
 The logs can be written to the console (not useful for a scheduled task),
 as well as a log file, email server, or database.  This file can be edited
 to change how the different log messages are logged.  It must be
@@ -23,8 +23,8 @@ edited if the path or name of the database or log file is changed.
 A python 2.7 file that was useful during development to test
 the structure of the log files and to ensure that all the
 possible errors and formats of the log files could be captured
-correctly. It captures a \lot of notes about the format and structure
-of the robocopy log format. This file is no longer needed, but might be
+correctly. It contains a lot of notes about the format and structure
+of the robocopy log files. This file is no longer needed, but might be
 helpful if a new version of robocopy changes the format of the log file.
 
 ## `processor/process_robo_logs.py`
@@ -34,11 +34,15 @@ A python 2.7 file that reads unprocessed logs in the
 and the 
 [PDS change log](https://github.com/AKROGIS/Robo-Website/blob/master/processor/process_robo_logs.py#L17)
 and writes results to the
-[log database](https://github.com/AKROGIS/Robo-Website/blob/master/processor/process_robo_logs.py#L485)
-and moves processed log files into a yearly archive sub folder.
+[log database](https://github.com/AKROGIS/Robo-Website/blob/master/processor/process_robo_logs.py#L485).
+It moves processed log files into a yearly archive sub folder.
 
 This script should be run as a scheduled task. It should be run in the morning
-after all the robocopy processes are completed.  It should be run by an
+after all the robocopy processes are completed.
+(See the robocopy scripts in the
+[PDS Data Management](https://github.com/AKROGIS/PDS-Data-Management/tree/master/robo-copy)
+repo for details).
+It should be run by an
 account that has write permissions to the log folder and all files/folders
 therein.  It also needs read permission to the PDS change log.
 
@@ -50,4 +54,4 @@ so details are not provided.  If needed, see the script for details.
 
 A python 2.7 file to provide the logging service with the
 ability to write logs to a sqlite3 database.
-`import`ed by `config_file.py`
+`import`ed by `config_logger.py`

@@ -9,8 +9,8 @@ The three components are:
 * **Server** -- a python http(s) server that listens for report requests and
   reads the log database to return json objects representing the
   requested report.
-* **Website** -- Presents the status of the robocopy process by request
-  reports from the server and format the reports in a web page.
+* **Website** -- Presents the status of the robocopy process by requesting
+  reports from the server and formatting the reports in a web page.
 
 ## Build
 
@@ -47,7 +47,7 @@ processor.
 * Copy `server/Server.py` to the server where the processor is deployed.
 
 * Copy the TLS certificate files to the folder where `server.py` is
-deployed.  See the GIS Team network drive `Projects\AKR\ArcGIS Server` for
+deployed.  See `Projects\AKR\ArcGIS Server` in the GIS Team network drive for
 details on obtaining and deploying the certificates. The certificate file
 names must match
 [server.py](https://github.com/AKROGIS/Robo-Website/blob/master/server/Server.py#L430).
@@ -99,9 +99,9 @@ in processing a log file (very rarely happens).
 It may happen that there is a log processing error that writes
 incorrect data into the log database. If that happens copy the
 [database](https://github.com/AKROGIS/Robo-Website/blob/master/processor/process_robo_logs.py#L485)
-in the [log folder](https://github.com/AKROGIS/Robo-Website/blob/master/processor/process_robo_logs.py#L16)
-to a local directory and use the sqlite3 command to issue SQL
-commands to query and correct the database.  See
+to a local directory and use the
+[sqlite3 command line tool](https://sqlite.org/cli.html)
+to issue SQL commands to query and correct the database.  See
 [processor/processor/process_robo_logs.py](https://github.com/AKROGIS/Robo-Website/blob/master/processor/process_robo_logs.py#L239-L290)
-for the database schema.  When the database is repaired, copy it back to the
-log folder.
+for the database schema.  After the database is repaired, copy it back to
+its home in the log folder on the server.
