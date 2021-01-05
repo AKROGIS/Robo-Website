@@ -55,6 +55,11 @@ names must match
 * Create and deploy a scheduled task to start this task when the server
 restarts, and if the task ever dies (it should run forever).  The task
 needs to be run with an account that can read the processor log database.
+See the file `server/server\X Drive - RoboLog Secure Data Service.xml`
+(a windows scheduled task export file).  The password for the service
+account is in the GIS Team password keeper, however the account is not a
+login account and it is managed by IT.  Contact IT if the password expires.
+**NOTE: When the pasword expires, the task will stop running.**
 
 * If TLS certificates expire, you can copy `SecureServer.py` to `Server.py`
 and change the last few lines to make it an `http` and not `https` service.
