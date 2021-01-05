@@ -40,21 +40,27 @@ the processor readme for details.
 ### Server
 
 * Verify that the
-[database path](https://github.com/AKROGIS/Robo-Website/blob/master/server/Server.py#L10)
-in `server/Server.py` matches the path set above for the
+[database path](https://github.com/AKROGIS/Robo-Website/blob/master/server/SecureServer.py#L10)
+in `server/SecureServer.py` matches the path set above for the
 processor.
 
-* Copy `server/Server.py` to the server where the processor is deployed.
+* Copy `server/SecureServer.py` to the server where the processor is deployed.
 
-* Copy the TLS certificate files to the folder where `server.py` is
+* Copy the TLS certificate files to the folder where `SecureServer.py` is
 deployed.  See `Projects\AKR\ArcGIS Server` in the GIS Team network drive for
 details on obtaining and deploying the certificates. The certificate file
 names must match
-[server.py](https://github.com/AKROGIS/Robo-Website/blob/master/server/Server.py#L430).
+[SecureServer.py](https://github.com/AKROGIS/Robo-Website/blob/master/server/SecureServer.py#L430).
 
 * Create and deploy a scheduled task to start this task when the server
 restarts, and if the task ever dies (it should run forever).  The task
 needs to be run with an account that can read the processor log database.
+
+* If TLS certificates expire, you can copy `SecureServer.py` to `Server.py`
+and change the last few lines to make it an `http` and not `https` service.
+This can be deployed without certificates. However you will also need
+to edit `website\script.js` to use `http`, and the website can only be loaded
+as `http` (a page loaded with `https` cannot link to less secure services).
 
 ### website
 
