@@ -67,6 +67,11 @@ in `website\script.js` matches the server and port set above at the end of
 on a web server.  Check the website to make sure it can query the
 server deployed above.
 
+* The website also serves the `PDS_ChangeLog.html`.  There is a scheduled task
+that needs to run that can copy this file from its home on the GIS data server,
+to this website folder.  For security reasons, the website does not have
+access to the data server.
+
 ## Using
 
 Point your browser to the directory where the website is published.  GIS
