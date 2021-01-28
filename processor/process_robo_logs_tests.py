@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 routines for testing the process for parsing and processing log files
 """
 
+from io import open
 import glob
 import os
 import sqlite3
@@ -231,7 +232,7 @@ def test_file_structure(log_folder):
     filelist = glob.glob(os.path.join(log_folder, '2018-*-update-x-drive.log'))
     for filename in filelist:
         try:
-            with open(filename, 'r') as file_handle:
+            with open(filename, 'r', encoding="utf-8") as file_handle:
                 previous_line = 'unknown'
                 p2_line = previous_line
                 in_header = True

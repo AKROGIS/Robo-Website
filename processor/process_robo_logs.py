@@ -5,6 +5,7 @@ Emails an admin when issues are found in the log file
 """
 
 import datetime
+from io import open
 import glob
 import logging
 import os
@@ -154,7 +155,7 @@ def process_park(file_name):
     line_num = 0
     error_line_num = line_num
     saved_error = None   # used when we are retrying an error.
-    with open(file_name, 'r') as file_handle:
+    with open(file_name, 'r', encoding="utf-8") as file_handle:
         for line in file_handle:
             try:
                 line_num += 1
@@ -462,7 +463,7 @@ def get_changes(db_name):
     if max_db_date is None:
         logger.info('No change dates in the datebase, reading entire change log.')
     dates = []
-    with open(CHANGE_LOG, 'r') as file_handle:
+    with open(CHANGE_LOG, 'r', encoding="utf-8") as file_handle:
         previous_line = file_handle.readline()
         for line in file_handle:
             if line.strip() == '----------':
