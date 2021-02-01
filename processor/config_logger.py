@@ -49,7 +49,7 @@ config = {
             'subject':  'Error running Robocopy Log Processor'
         },
         'sqlite': {
-            'class': 'SQLiteHandler.SQLiteHandler',
+            'class': 'sqlite_handler.SQLiteHandler',
             'level': 'ERROR',
             'db':    'E:/Xdrive/Logs/logs.db'
         }
