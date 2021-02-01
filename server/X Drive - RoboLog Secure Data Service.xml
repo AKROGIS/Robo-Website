@@ -48,7 +48,7 @@
   <Actions Context="Author">
     <Exec>
       <Command>C:\Python27\ArcGISx6410.6\python.exe</Command>
-      <Arguments>"E:\XDrive\UpdateTools\LogProcessor\ServerSecure.py"</Arguments>
+      <Arguments>"E:\XDrive\UpdateTools\LogProcessor\server_secure.py"</Arguments>
       <WorkingDirectory>E:\XDrive\UpdateTools\LogProcessor</WorkingDirectory>
     </Exec>
   </Actions>

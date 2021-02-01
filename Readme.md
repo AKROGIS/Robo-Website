@@ -40,17 +40,17 @@ the processor readme for details.
 ### Server
 
 * Verify that the
-[database path](https://github.com/AKROGIS/Robo-Website/blob/master/server/SecureServer.py#L10)
-in `server/SecureServer.py` matches the path set above for the
+[database path](https://github.com/AKROGIS/Robo-Website/blob/master/server/secure_server.py#L10)
+in `server/secure_server.py` matches the path set above for the
 processor.
 
-* Copy `server/SecureServer.py` to the server where the processor is deployed.
+* Copy `server/secure_server.py` to the server where the processor is deployed.
 
-* Copy the TLS certificate files to the folder where `SecureServer.py` is
+* Copy the TLS certificate files to the folder where `secure_server.py` is
 deployed.  See `Projects\AKR\ArcGIS Server` in the GIS Team network drive for
 details on obtaining and deploying the certificates. The certificate file
 names must match
-[SecureServer.py](https://github.com/AKROGIS/Robo-Website/blob/master/server/SecureServer.py#L430).
+[secure_server.py](https://github.com/AKROGIS/Robo-Website/blob/master/server/secure_server.py#L430).
 
 * Create and deploy a scheduled task to start this task when the server
 restarts, and if the task ever dies (it should run forever).  The task
@@ -61,8 +61,8 @@ account is in the GIS Team password keeper, however the account is not a
 login account and it is managed by IT.  Contact IT if the password expires.
 **NOTE: When the pasword expires, the task will stop running.**
 
-* If TLS certificates expire, you can copy `SecureServer.py` to `Server.py`
 and change the last few lines to make it an `http` and not `https` service.
+* If TLS certificates expire, you can copy `secure_server.py` to `server.py`
 This can be deployed without certificates. However you will also need
 to edit `website\script.js` to use `http`, and the website can only be loaded
 as `http` (a page loaded with `https` cannot link to less secure services).
