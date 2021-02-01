@@ -10,10 +10,11 @@ import datetime
 from io import open
 import glob
 import logging
+import logging.config
 import os
 import sqlite3
 import time
-import logging.config
+
 import config_logger
 
 LOG_ROOT = r'E:\XDrive\Logs'

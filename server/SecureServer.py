@@ -10,8 +10,16 @@ import json
 import os
 import sqlite3
 import ssl
-import urlparse
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+
+try:
+    # Python 2
+    import urlparse
+    from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+except ImportError:
+    # Python 3
+    import urllib.urlparse as urlparse
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+
 
 LOG_DB = 'E:/XDrive/Logs/logs.db'
 #LOG_DB = r'\\inpakrovmais\XDrive\Logs\logs.db'
