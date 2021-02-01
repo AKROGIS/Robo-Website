@@ -31,7 +31,13 @@ a folder adjacent to the location where the robocopy log files are written
 [PDS Data Management](https://github.com/AKROGIS/PDS-Data-Management/tree/master/robo-copy)
 repo).
 
-* Verify that python 2.7 is installed on the server.  No special modules
+* Edit `config_logger.py` and follow comments at end to enable email in
+  production.
+
+* Edit `process_robo_logs.py` and follow comments near beginning to enable
+  logging for production vs. testing.
+
+* Verify that python 2.7 or 3.6+ is installed on the server.  No special modules
 are required.
 
 * Create and deploy a scheduled task to run `process_robo_logs.py`.  See
@@ -40,7 +46,7 @@ the processor readme for details.
 ### Server
 
 * Verify that the
-[database path](https://github.com/AKROGIS/Robo-Website/blob/master/server/secure_server.py#L10)
+[database path](https://github.com/AKROGIS/Robo-Website/blob/master/server/secure_server.py#L32)
 in `server/secure_server.py` matches the path set above for the
 processor.
 
@@ -50,7 +56,7 @@ processor.
 deployed.  See `Projects\AKR\ArcGIS Server` in the GIS Team network drive for
 details on obtaining and deploying the certificates. The certificate file
 names must match
-[secure_server.py](https://github.com/AKROGIS/Robo-Website/blob/master/server/secure_server.py#L430).
+[secure_server.py](https://github.com/AKROGIS/Robo-Website/blob/master/server/secure_server.py#L476).
 
 * Create and deploy a scheduled task to start this task when the server
 restarts, and if the task ever dies (it should run forever).  The task
@@ -61,8 +67,9 @@ account is in the GIS Team password keeper, however the account is not a
 login account and it is managed by IT.  Contact IT if the password expires.
 **NOTE: When the pasword expires, the task will stop running.**
 
-and change the last few lines to make it an `http` and not `https` service.
 * If TLS certificates expire, you can copy `secure_server.py` to `server.py`
+and change the config section (set `secure = False`) to make it an `http` and
+not `https` service.
 This can be deployed without certificates. However you will also need
 to edit `website\script.js` to use `http`, and the website can only be loaded
 as `http` (a page loaded with `https` cannot link to less secure services).
@@ -106,18 +113,18 @@ robocopy logs.  If the website is unable to get the reports, check
 that the scheduled tasks for the server and processor are running.
 
 The data manager should check the log file (configured in
-[processor/config_file.py](https://github.com/AKROGIS/Robo-Website/blob/master/processor/config_logger.py#L28))
-for issues, and be on the alert for emails (configured in
 [processor/config_file.py](https://github.com/AKROGIS/Robo-Website/blob/master/processor/config_logger.py#L37))
+for issues, and be on the alert for emails (configured in
+[processor/config_file.py](https://github.com/AKROGIS/Robo-Website/blob/master/processor/config_logger.py#L48))
 from the log processor. This will happen if there is some error
 in processing a log file (very rarely happens).
 
 It may happen that there is a log processing error that writes
 incorrect data into the log database. If that happens copy the
-[database](https://github.com/AKROGIS/Robo-Website/blob/master/processor/process_robo_logs.py#L485)
+[database](https://github.com/AKROGIS/Robo-Website/blob/master/processor/process_robo_logs.py#L32)
 to a local directory and use the
 [sqlite3 command line tool](https://sqlite.org/cli.html)
 to issue SQL commands to query and correct the database.  See
-[processor/processor/process_robo_logs.py](https://github.com/AKROGIS/Robo-Website/blob/master/processor/process_robo_logs.py#L239-L290)
+[processor/processor/process_robo_logs.py](https://github.com/AKROGIS/Robo-Website/blob/master/processor/process_robo_logs.py#L359-L426)
 for the database schema.  After the database is repaired, copy it back to
 its home in the log folder on the server.
