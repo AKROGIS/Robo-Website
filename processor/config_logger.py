@@ -1,5 +1,13 @@
-# This is a logger configuration dictionary.
-# It is defined in https://docs.python.org/2/library/logging.config.html
+# -*- coding: utf-8 -*-
+"""
+Configuration parameters for the default logging system.
+
+This is a logger configuration dictionary.
+It is defined in https://docs.python.org/2/library/logging.config.html
+"""
+
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 
 config = {
     'version': 1,
@@ -14,7 +22,8 @@ config = {
         }
     },
     'handlers': {
-        # command line arguments (--verbose and --debug will change the level of first handler to INFO and DEBUG)
+        # command line arguments (--verbose and --debug will change the level of
+        # first handler to INFO and DEBUG)
         'console': {
             'class':     'logging.StreamHandler',
             'level':     'WARNING',
@@ -28,8 +37,10 @@ config = {
             'filename':  'E:/Xdrive/Logs/LogProcessor.log'
         },
         'email': {
-            # 'class':    'logging.handlers.SMTPHandler',  # Separate email for each message
+            # Bundle 100 messages into a single email
             "class": "buffering_smtp_handler.BufferingSMTPHandler",
+            # Separate email for each message
+            # 'class':    'logging.handlers.SMTPHandler',
             'level':     'ERROR',
             'formatter': 'detailed',
             'mailhost': 'mailer.itc.nps.gov',
@@ -45,7 +56,7 @@ config = {
     },
     'root': {
         'level': 'NOTSET',
-        # 'handlers': ['console', 'file', 'sqlite']  # Do not send emails when testing
-        'handlers': ['console', 'file', 'sqlite', 'email']  # Send emails in production
+        'handlers': ['console', 'file', 'sqlite']  # Do not send emails when testing
+        # 'handlers': ['console', 'file', 'sqlite', 'email']  # Send emails in production
     }
 }
