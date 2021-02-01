@@ -1,17 +1,15 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+# -*- coding: utf-8 -*-
 """
 A minimal SQLite handler for the python logging module
 
 from: https://gist.github.com/giumas/994e48d3c1cff45fbe93
 with minor changes
 """
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-import sqlite3
 import logging
+import sqlite3
 import time
-
-__version__ = "0.1.1"
 
 
 initial_sql = """CREATE TABLE IF NOT EXISTS log(

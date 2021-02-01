@@ -1,4 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+An HTTP server which publishes stats about the robo copy logs database.
+"""
 from __future__ import absolute_import, division, print_function, unicode_literals
+
 import datetime
 from io import open
 import json

@@ -1,8 +1,10 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+# -*- coding: utf-8 -*-
 """
 Reads the log files from robocopy and summarizes them in a database
 Emails an admin when issues are found in the log file
 """
+
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import datetime
 from io import open

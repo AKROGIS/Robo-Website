@@ -1,12 +1,14 @@
+# -*- coding: utf-8 -*-
+"""
+Routines for testing the process for parsing and processing log files
+"""
 from __future__ import absolute_import, division, print_function, unicode_literals
-"""
-routines for testing the process for parsing and processing log files
-"""
 
 from io import open
 import glob
 import os
 import sqlite3
+
 import process_robo_logs
 
 # Mac
