@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 An HTTP server which publishes stats about the robo copy logs database.
+
+Edit the Config object below as needed for each execution.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -21,13 +23,22 @@ except ImportError:
     from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
-LOG_DB = "E:/XDrive/Logs/logs.db"
-# LOG_DB = r'\\inpakrovmais\XDrive\Logs\logs.db'
-# LOG_DB = 'data/logs.db'
+class Config(object):
+    """Namespace for configuration parameters. Edit as needed."""
+
+    # pylint: disable=useless-object-inheritance,too-few-public-methods
+
+    # Location of the logs database
+    log_database = "E:/XDrive/Logs/logs.db"
+
+    # Secure Service
+    # If true creates an https server on port 8443, else it is an http server on port 8080
+    # a secure service requires `import ssl`
+    secure = True
 
 
 class SyncHandler(BaseHTTPRequestHandler):
-    db_name = LOG_DB
+    db_name = Config.log_database
     name = "Xdrive RoboCopy Log Details"
     usage = """
         Usage:
@@ -185,7 +196,7 @@ class SyncHandler(BaseHTTPRequestHandler):
                         return
             if filename:
                 filename = os.path.basename(filename)
-                folder = os.path.dirname(LOG_DB)
+                folder = os.path.dirname(Config.log_database)
                 archive = date[:4] + "archive"
                 filename = os.path.join(folder, archive, filename)
                 if os.path.exists(filename):
@@ -194,7 +205,7 @@ class SyncHandler(BaseHTTPRequestHandler):
                     msg = "log file {0} not found".format(filename)
                     self.err_response(msg)
             else:
-                folder = os.path.dirname(LOG_DB)
+                folder = os.path.dirname(Config.log_database)
                 filename = os.path.join(folder, "LogProcessor.log")
                 if os.path.exists(filename):
                     self.file_response(filename)
@@ -458,12 +469,13 @@ class SyncHandler(BaseHTTPRequestHandler):
         return park
 
 
-# Next line is for an insecure (http) service (import ssl not required)
-# server = HTTPServer(('', 8080), SyncHandler)
-# Next two lines are for a secure (https) service (import ssl required)
-server = HTTPServer(("", 8443), SyncHandler)
-server.socket = ssl.wrap_socket(
-    server.socket, keyfile="key.pem", certfile="cert.pem", server_side=True
-)
-# For more info on https see: https://gist.github.com/dergachev/7028596
+if Config.secure:
+    # For more info on https see: https://gist.github.com/dergachev/7028596
+    server = HTTPServer(("", 8443), SyncHandler)
+    server.socket = ssl.wrap_socket(
+        server.socket, keyfile="key.pem", certfile="cert.pem", server_side=True
+    )
+else:
+    server = HTTPServer(("", 8080), SyncHandler)
+
 server.serve_forever()

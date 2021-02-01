@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Routines for testing the process for parsing and processing log files
+Routines for testing the process for parsing and processing log files.
+
+See the end of the file configuration parameters and potential tests.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -11,17 +13,6 @@ import sqlite3
 
 import process_robo_logs
 
-# Mac
-# LOG_ROOT = 'data/Logs/old'
-# DB = 'data/logs.db'
-
-# Workstation (PC)
-LOG_ROOT = r"\\inpakrovmais\Xdrive\Logs\2018archive"
-DB = r"\\inpakrovmais\Xdrive\Logs\logs.db"
-
-# Server
-# LOG_ROOT = 'E:/XDrive/Logs'
-# DB = 'E:/XDrive/Logs/logs.db'
 
 r"""
 Error Formating
@@ -530,6 +521,18 @@ group by l.park order by l.park;
 
 
 if __name__ == "__main__":
+    # Testing on Mac
+    # LOG_ROOT = 'data/Logs/old'
+    # DB = 'data/logs.db'
+
+    # Testing on Workstation (PC)
+    LOG_ROOT = r"\\inpakrovmais\Xdrive\Logs\2018archive"
+    DB = r"\\inpakrovmais\Xdrive\Logs\logs.db"
+
+    # Production Server
+    # LOG_ROOT = 'E:/XDrive/Logs'
+    # DB = 'E:/XDrive/Logs/logs.db'
+
     # db_testing(':memory:')
     # test_queries(DB)
     test_file_structure(LOG_ROOT)

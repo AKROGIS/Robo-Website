@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 Reads the log files from robocopy and summarizes them in a database
-Emails an admin when issues are found in the log file
+Emails an admin when issues are found in the log file.
+
+Edit the Config object below as needed for each execution.
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -17,14 +19,20 @@ import time
 
 import config_logger
 
-LOG_ROOT = r"E:\XDrive\Logs"
-CHANGE_LOG = r"\\inpakrovmdist\gisdata2\GIS\ThemeMgr\PDS_ChangeLog.txt"
-# For testing on Mac
-# LOG_ROOT = 'data'
-# CHANGE_LOG = r'data/PDS_ChangeLog.txt'
-# For testing on PC
-# LOG_ROOT = r'\\inpakrovmais\XDrive\Logs'
 
+class Config(object):
+    """Namespace for configuration parameters. Edit as needed."""
+
+    # pylint: disable=useless-object-inheritance,too-few-public-methods
+
+    # Folder where the log files live
+    log_folder = r"E:\XDrive\Logs"
+
+    # Path to the "PDS Change Log" - describes changes robo copy is propagating
+    change_log = r"\\inpakrovmdist\gisdata2\GIS\ThemeMgr\PDS_ChangeLog.txt"
+
+
+# Configure and start the logger
 logging.config.dictConfig(config_logger.config)
 # Comment the next line during testing, uncomment in production
 logging.raiseExceptions = False  # Ignore errors in the logging system
@@ -594,8 +602,9 @@ def clean_folder(folder):
 
 
 def get_changes(db_name):
-    if not os.path.exists(CHANGE_LOG):
-        logger.error("Change Log (%s) not found", CHANGE_LOG)
+    change_log = Config.change_log
+    if not os.path.exists(change_log):
+        logger.error("Change Log (%s) not found", change_log)
         return
     # if Change Log is older than last date in database, then skip
     # if no dates in datebase, then read all
@@ -605,7 +614,7 @@ def get_changes(db_name):
         max_db_date = (
             conn.cursor().execute("SELECT MAX(date) FROM changes;").fetchone()[0]
         )
-    unix_timestamp = os.path.getmtime(CHANGE_LOG)
+    unix_timestamp = os.path.getmtime(change_log)
     file_date = datetime.datetime.fromtimestamp(unix_timestamp).isoformat()[:10]
     if file_date <= max_db_date:
         logger.info(
@@ -617,7 +626,7 @@ def get_changes(db_name):
     if max_db_date is None:
         logger.info("No change dates in the datebase, reading entire change log.")
     dates = []
-    with open(CHANGE_LOG, "r", encoding="utf-8") as file_handle:
+    with open(change_log, "r", encoding="utf-8") as file_handle:
         previous_line = file_handle.readline()
         for line in file_handle:
             if line.strip() == "----------":
@@ -641,8 +650,8 @@ def get_changes(db_name):
 
 if __name__ == "__main__":
     try:
-        db = os.path.join(LOG_ROOT, "logs.db")
-        folder = LOG_ROOT
+        db = os.path.join(Config.log_folder, "logs.db")
+        folder = Config.log_folder
         # clean_db(db)
         main(db, folder)
     except Exception as ex:
