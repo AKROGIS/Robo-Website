@@ -37,7 +37,17 @@ class Config(object):
     secure = True
 
 
+# pylint: disable=broad-except
+# If an unexpected exception occurs, I want to send the error to the user, and continue
+# pylint: disable=too-many-locals,too-many-branches,too-many-statements,too-many-return-statements
+# I know this code is a little complicated, but I'm not going to risk refactoring.
+# pylint: disable=invalid-name,no-self-use
+# issues cannot be corrected without breaking the class contract.
+
+
 class SyncHandler(BaseHTTPRequestHandler):
+    """A simple HTTP server."""
+
     db_name = Config.log_database
     name = "Xdrive RoboCopy Log Details"
     usage = """
@@ -50,6 +60,7 @@ class SyncHandler(BaseHTTPRequestHandler):
     """
 
     def do_GET(self):
+        """Handle a GET request."""
         path_parts = urlparse.urlparse(self.path)
         params = urlparse.parse_qs(path_parts.query)
         sql_params = []
@@ -81,12 +92,12 @@ class SyncHandler(BaseHTTPRequestHandler):
                 else:
                     self.err_response("Bad date request")
                     return
-            with sqlite3.connect(self.db_name) as db:
+            with sqlite3.connect(self.db_name) as database:
                 try:
-                    resp = self.db_get_one(db, sql, sql_params)
+                    resp = self.db_get_one(database, sql, sql_params)
                     self.std_response(resp)
                 except Exception as ex:
-                    self.err_response(ex.message)
+                    self.err_response("{0}".format(ex))
 
         elif path_parts.path == "/parks":
             sql = """
@@ -114,12 +125,12 @@ class SyncHandler(BaseHTTPRequestHandler):
                 else:
                     self.err_response("Bad date request")
                     return
-            with sqlite3.connect(self.db_name) as db:
+            with sqlite3.connect(self.db_name) as database:
                 try:
-                    resp = self.db_get_rows(db, sql, sql_params)
+                    resp = self.db_get_rows(database, sql, sql_params)
                     self.std_response(resp)
                 except Exception as ex:
-                    self.err_response(ex.message)
+                    self.err_response("{0}".format(ex))
 
         elif path_parts.path == "/error_summary":
             sql = """
@@ -138,12 +149,12 @@ class SyncHandler(BaseHTTPRequestHandler):
                 except ValueError:
                     pass
             sql_params = [log_id]
-            with sqlite3.connect(self.db_name) as db:
+            with sqlite3.connect(self.db_name) as database:
                 try:
-                    resp = self.db_get_rows(db, sql, sql_params)
+                    resp = self.db_get_rows(database, sql, sql_params)
                     self.std_response(resp)
                 except Exception as ex:
-                    self.err_response(ex.message)
+                    self.err_response("{0}".format(ex))
 
         elif path_parts.path == "/error_details":
             sql = """
@@ -167,12 +178,12 @@ class SyncHandler(BaseHTTPRequestHandler):
                 except ValueError:
                     pass
             sql_params = [log_id, code]
-            with sqlite3.connect(self.db_name) as db:
+            with sqlite3.connect(self.db_name) as database:
                 try:
-                    resp = self.db_get_rows(db, sql, sql_params)
+                    resp = self.db_get_rows(database, sql, sql_params)
                     self.std_response(resp)
                 except Exception as ex:
-                    self.err_response(ex.message)
+                    self.err_response("{0}".format(ex))
 
         elif path_parts.path == "/logfile":
             sql = "SELECT filename FROM logs WHERE date = ? AND park = ?"
@@ -186,13 +197,13 @@ class SyncHandler(BaseHTTPRequestHandler):
             filename = None
             if park and date:
                 sql_params = [date, park]
-                with sqlite3.connect(self.db_name) as db:
+                with sqlite3.connect(self.db_name) as database:
                     try:
-                        resp = self.db_get_one(db, sql, sql_params)
+                        resp = self.db_get_one(database, sql, sql_params)
                         if resp and "filename" in resp:
                             filename = resp["filename"]
                     except Exception as ex:
-                        self.err_response(ex.message)
+                        self.err_response("{0}".format(ex))
                         return
             if filename:
                 filename = os.path.basename(filename)
@@ -220,12 +231,12 @@ class SyncHandler(BaseHTTPRequestHandler):
                 MAX(date) as last_date
                 FROM logs;
             """
-            with sqlite3.connect(self.db_name) as db:
+            with sqlite3.connect(self.db_name) as database:
                 try:
-                    resp = self.db_get_one(db, sql)
+                    resp = self.db_get_one(database, sql)
                     self.std_response(resp)
                 except Exception as ex:
-                    self.err_response(ex.message)
+                    self.err_response("{0}".format(ex))
 
         elif path_parts.path == "/plot1":
             sql = """
@@ -251,12 +262,12 @@ class SyncHandler(BaseHTTPRequestHandler):
                 else:
                     self.err_response("Bad date request")
                     return
-            with sqlite3.connect(self.db_name) as db:
+            with sqlite3.connect(self.db_name) as database:
                 try:
-                    resp = self.db_get_rows(db, sql, sql_params, False)
+                    resp = self.db_get_rows(database, sql, sql_params, False)
                     self.std_response(resp)
                 except Exception as ex:
-                    self.err_response(ex.message)
+                    self.err_response("{0}".format(ex))
 
         elif path_parts.path == "/scanavg":
             sql = """
@@ -283,12 +294,12 @@ class SyncHandler(BaseHTTPRequestHandler):
                     return
             else:
                 sql = sql.replace("AND l.date > ?", "")
-            with sqlite3.connect(self.db_name) as db:
+            with sqlite3.connect(self.db_name) as database:
                 try:
-                    resp = self.db_get_rows(db, sql, sql_params, False)
+                    resp = self.db_get_rows(database, sql, sql_params, False)
                     self.std_response(resp)
                 except Exception as ex:
-                    self.err_response(ex.message)
+                    self.err_response("{0}".format(ex))
 
         elif path_parts.path == "/copyavg":
             sql = """
@@ -315,12 +326,12 @@ class SyncHandler(BaseHTTPRequestHandler):
                     return
             else:
                 sql = sql.replace("AND l.date > ?", "")
-            with sqlite3.connect(self.db_name) as db:
+            with sqlite3.connect(self.db_name) as database:
                 try:
-                    resp = self.db_get_rows(db, sql, sql_params, False)
+                    resp = self.db_get_rows(database, sql, sql_params, False)
                     self.std_response(resp)
                 except Exception as ex:
-                    self.err_response(ex.message)
+                    self.err_response("{0}".format(ex))
 
         elif path_parts.path == "/speed":
             sql = """
@@ -371,12 +382,12 @@ class SyncHandler(BaseHTTPRequestHandler):
                     return
             else:
                 sql = sql.replace("AND l.park = ?", "")
-            with sqlite3.connect(self.db_name) as db:
+            with sqlite3.connect(self.db_name) as database:
                 try:
-                    resp = self.db_get_rows(db, sql, sql_params, False)
+                    resp = self.db_get_rows(database, sql, sql_params, False)
                     self.std_response(resp)
                 except Exception as ex:
-                    self.err_response(ex.message)
+                    self.err_response("{0}".format(ex))
 
         elif path_parts.path == "/help":
             self.std_response({"help": self.usage})
@@ -384,6 +395,8 @@ class SyncHandler(BaseHTTPRequestHandler):
             self.err_response(self.usage)
 
     def std_response(self, obj):
+        """respond with a JSON (obj) object."""
+
         data = json.dumps(obj)
         self.send_response(200)
         self.send_header("Content-type", "json")
@@ -392,17 +405,21 @@ class SyncHandler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
     def file_response(self, filename):
+        """Respond with the contents of filename."""
+
         try:
-            f = open(filename, "rb")
+            in_file = open(filename, "rb")
             self.send_response(200)
             self.send_header("Content-type", "text")
             self.end_headers()
-            self.wfile.write(f.read())
-            f.close()
+            self.wfile.write(in_file.read())
+            in_file.close()
         except IOError:
             self.send_error(404, "File Not Found: {0}".format(filename))
 
     def err_response(self, message):
+        """Respond with an error message."""
+
         data = json.dumps({"error": message})
         self.send_response(500)
         self.send_header("Content-type", "json")
@@ -411,40 +428,53 @@ class SyncHandler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
     def do_POST(self):
+        """Handle a POST request."""
+
         if self.path == "/sync":
             self.err_response("not implemented")
 
     def end_headers(self):
+        """Send the end of a header."""
+
         self.send_header("Access-Control-Allow-Origin", "*")
         BaseHTTPRequestHandler.end_headers(self)
 
-    def db_get_rows(self, db, sql, params, header=True):
-        cursor = db.cursor()
+    def db_get_rows(self, database, sql, params, header=True):
+        """Execute sql on the database and return the resulting rows."""
+
+        cursor = database.cursor()
         rows = cursor.execute(sql, params).fetchall()
         if header:
             return [[item[0] for item in cursor.description]] + rows
-        else:
-            return rows
+        return rows
 
-    def db_get_one(self, db, sql, params=[]):
-        cursor = db.cursor()
+    def db_get_one(self, database, sql, params=None):
+        """Execute sql on the database and return the resulting row."""
+
+        if params is None:
+            params = []
+        cursor = database.cursor()
         row = cursor.execute(sql, params).fetchone()
         header = [item[0] for item in cursor.description]
         # types = [item[1] for item in cursor.description]
         results = {}
         if row:
-            for i in range(len(row)):
-                results[header[i]] = row[i]
+            for i, item in enumerate(row):
+                results[header[i]] = item
         return results
 
-    def sanitize_date(self, s):
+    def sanitize_date(self, text):
+        """Return text or None if text is not a valid date in the YYYY-MM-DD format."""
+
         try:
-            date = datetime.datetime.strptime(s, "%Y-%m-%d")
+            date = datetime.datetime.strptime(text, "%Y-%m-%d")
         except ValueError:
             return None
         return date.strftime("%Y-%m-%d")
 
-    def sanitize_park(self, s):
+    def sanitize_park(self, text):
+        """Return one of parks or None if text (case insensitive) is not in parks."""
+
         parks = [
             "DENA",
             "GLBA",
@@ -461,7 +491,7 @@ class SyncHandler(BaseHTTPRequestHandler):
             "YUGA",
         ]
         try:
-            park = s.upper()
+            park = text.upper()
             if park not in parks:
                 return None
         except ValueError:
