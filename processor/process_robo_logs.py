@@ -28,8 +28,11 @@ class Config(object):
     # Folder where the log files live
     log_folder = r"E:\XDrive\Logs"
 
-    # Path to the "PDS Change Log" - describes changes robo copy is propagating
-    change_log = r"\\inpakrovmdist\gisdata2\GIS\ThemeMgr\PDS_ChangeLog.txt"
+    # Path to the sqlite3 database with the log data
+    database_path = os.path.join(log_folder, "logs.db")
+
+    # Path to the "PDS Change Log" - describes changes robocopy is propagating
+    change_log_path = r"\\inpakrovmdist\gisdata2\GIS\ThemeMgr\PDS_ChangeLog.txt"
 
 
 # Configure and start the logger
@@ -40,7 +43,12 @@ logger = logging.getLogger("main")
 logger.info("Logging Started")
 
 
+# pylint: disable=broad-except
+# If an unexpected exception occurs, I want to log the error, and continue
+
 def process_summary(file_handle, filename, line_num):
+    """Return a records of stats for the summary section of the log file."""
+
     results = {}
     for key, text in [
         ("dirs", "Dirs :"),
@@ -53,9 +61,9 @@ def process_summary(file_handle, filename, line_num):
             line_num += 1
             results[key] = process_summary_line(line, text, filename, line_num)
         except Exception as ex:
-            # overly broad exception catching.  I don't care what happened, I want to log the error, and continue
             logger.error(
-                "Unexpected exception processing summary, file: %s, line#: %d, key: %s, text: %s, line: %s, exception: %s",
+                ("Unexpected exception processing summary, "
+                "file: %s, line#: %d, key: %s, text: %s, line: %s, exception: %s"),
                 filename,
                 line_num,
                 key,
@@ -67,6 +75,8 @@ def process_summary(file_handle, filename, line_num):
 
 
 def process_summary_line(line, sentinal, filename, line_num):
+    """Return a records of stats for a line in the summary section of the log file."""
+
     count_obj = {}
     count_obj["total"] = -1
     count_obj["copied"] = -1
@@ -123,6 +133,8 @@ def process_summary_line(line, sentinal, filename, line_num):
 
 
 def process_error(file_handle, filename, line, line_num, error_sentinal):
+    """Return information about a error in the log file."""
+
     code, message = parse_error_line(line, filename, line_num, error_sentinal)
     error_line_num = line_num
     if not code:
@@ -137,9 +149,10 @@ def process_error(file_handle, filename, line, line_num, error_sentinal):
     eof = False
     try:
         # next line is the name of the error (always valid in 1 year of log data)
-        # The name line ends with 0x0D0D0A (\r\r\n), which python (win and mac) interprets as one line
-        # vscode interprets as 2 lines (for line counting), but notepad and other editors do not
-        # we will not double count this line, so line numbers will NOT match vscode line numbers.
+        # The name line ends with 0x0D0D0A (\r\r\n), which python (win and mac)
+        # interprets as one line. vscode interprets as 2 lines (for line counting),
+        # but notepad and other editors do not. we will not double count this line,
+        # so line numbers will NOT match vscode line numbers.
         name = file_handle.next().strip()
         line_num += 1
         # From known log files: next lines will be one of a) retry, b) blank, or c) error (EOF)
@@ -165,9 +178,9 @@ def process_error(file_handle, filename, line, line_num, error_sentinal):
                 line,
             )
     except Exception as ex:
-        # overly broad exception catching.  I don't care what happened, I want to log the error, and continue\
         logger.error(
-            "Unexpected exception processing error lines in log file: %s, line#: %d, line: %s, exception: %s",
+            ("Unexpected exception processing error lines in log "
+            "file: %s, line#: %d, line: %s, exception: %s"),
             filename,
             line_num,
             line,
@@ -182,22 +195,19 @@ def process_error(file_handle, filename, line, line_num, error_sentinal):
         "line_num": error_line_num,
         "message": message,
     }
-    return (
-        error,
-        eof,
-        retry,
-        line_num,
-    )  # ignore the last line read (blank or retry), caller can read the next line to continue
+    # ignore the last line read (blank or retry), caller can read the next line to continue
+    return (error, eof, retry, line_num)
 
 
 def parse_error_line(line, filename, line_num, error_sentinal):
+    """Return information about one line in a error section of the log file."""
+
     code = 0
     message = "Message not defined"
     try:
         code = int(line.split(error_sentinal)[1].split()[0])
         message = line.split(") ")[1].strip()
     except Exception as ex:
-        # overly broad exception catching.  I don't care what happened, I want to log the error, and continue
         logger.error(
             "Parsing error line in log file: %s, line#: %d, line: %s, exception: %s",
             filename,
@@ -209,6 +219,8 @@ def parse_error_line(line, filename, line_num, error_sentinal):
 
 
 def process_park(file_name):
+    """Return statistics for a single log file (each park is logged separately)."""
+
     summary_header = "Total    Copied   Skipped  Mismatch    FAILED    Extras"
     error_sentinal = " ERROR "
     finished_sentinal = "   Ended : "
@@ -243,24 +255,32 @@ def process_park(file_name):
                         results["errors"].append(error)
                         break
                     if not retry:
-                        # We don't care what comes next, we will treat it all the same.
-                        # This includes the failing after the last retry (next line will be RETRY LIMIT EXCEEDED)
-                        saved_error = None  # this will only be non null when saved_error['message'] == error['message']
+                        # We don't care what comes next, we will treat it all the
+                        # same. This includes the failing after the last retry
+                        # (next line will be RETRY LIMIT EXCEEDED)
+                        # this will only be non null when
+                        #   saved_error['message'] == error['message']
+                        saved_error = None
                         results["errors"].append(error)
                     else:  # error is retrying
-                        # if not saved_error then saved_error['message'] == error['message'], so assignment is redundant but harmless
+                        # if not saved_error then saved_error['message'] == error['message'],
+                        # so assignment is redundant but harmless
                         saved_error = error
                         error_line_num = line_num
                         # Options for what comes next:
-                        #   1) same error repeats as a fail: clear saved_error, log new error, continue
-                        #   2) same error repeats with a new retry: (re)set saved_error, continue
-                        #   3) new error: save saved_error as fail, process new error based on retry status
+                        #   1) same error repeats as a fail: clear saved_error,
+                        #      log new error, continue
+                        #   2) same error repeats with a new retry: (re)set
+                        #      saved_error, continue
+                        #   3) new error: save saved_error as fail, process new
+                        #      error based on retry status
                         #   4) retry succeeds: log this error: status should be non-fail
                     continue
                 else:
                     if saved_error is not None:
                         # this line is not an error and the last error we saw was retrying
-                        #   1) this is a repeat of the file name before the error, which means nothing, need to check following line
+                        #   1) this is a repeat of the file name before the error,
+                        #      which means nothing, need to check following line
                         #   2) this is a new filename
                         retry_worked = line_num - error_line_num > 1
                         if retry_worked:
@@ -283,29 +303,34 @@ def process_park(file_name):
                         )
                         results["finished"] = False
             except Exception as ex:
-                # overly broad exception catching.  I don't care what happened, I want to log the error, and continue
                 logger.error(
-                    "Unexpected exception processing log, file: %s, line#: %d, line: %s, exception: %s",
+                    ("Unexpected exception processing log, "
+                    "file: %s, line#: %d, line: %s, exception: %s"),
                     file_name,
                     line_num,
                     line,
                     ex,
                 )
         if saved_error:
-            # could happen if there was a error retrying that was not resolved before the file ended
+            # could happen if there was a error retrying that was not resolved
+            # before the file ended
             results["errors"].append(saved_error)  # logs a non-failing error
     return results
 
 
 def clean_db(db_name):
+    """Clean and recreate the log file database."""
+
     with sqlite3.connect(db_name) as conn:
         db_clear(conn, drop=False)
         db_create(conn)
 
 
-def db_clear(db, drop=True):
+def db_clear(database, drop=True):
+    """Delete all records in all Tables and drop all indexes in the log file database."""
+
     try:
-        cursor = db.cursor()
+        cursor = database.cursor()
         if drop:
             cursor.execute("DROP INDEX IF EXISTS changes_date_ix")
             cursor.execute("DROP INDEX IF EXISTS logs_date_ix")
@@ -318,13 +343,15 @@ def db_clear(db, drop=True):
             cursor.execute("DELETE FROM stats")
             cursor.execute("DELETE FROM errors")
             cursor.execute("DELETE FROM changes")
-        db.commit()
+        database.commit()
     except sqlite3.OperationalError:
         pass
 
 
-def db_create(db):
-    cursor = db.cursor()
+def db_create(database):
+    """Build any missing tables and indexes in the log file database."""
+
+    cursor = database.cursor()
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS logs(
@@ -388,11 +415,13 @@ def db_create(db):
         CREATE INDEX IF NOT EXISTS changes_date_ix ON changes(date);
     """
     )
-    db.commit()
+    database.commit()
 
 
-def db_write_log(db, log):
-    cursor = db.cursor()
+def db_write_log(database, log):
+    """Write a log file summary to the log file database."""
+
+    cursor = database.cursor()
     cursor.execute(
         """
         INSERT INTO logs (park, date, filename, finished)
@@ -401,12 +430,14 @@ def db_write_log(db, log):
         log,
     )
     log_id = cursor.lastrowid
-    db.commit()
+    database.commit()
     return log_id
 
 
-def db_write_stats(db, stats):
-    cursor = db.cursor()
+def db_write_stats(database, stats):
+    """Write log file statistics to the log file database."""
+
+    cursor = database.cursor()
     cursor.executemany(
         """
         INSERT INTO stats (log_id, stat, copied, extra, failed, mismatch, skipped, total)
@@ -414,11 +445,13 @@ def db_write_stats(db, stats):
     """,
         stats,
     )
-    db.commit()
+    database.commit()
 
 
-def db_write_errors(db, errors):
-    cursor = db.cursor()
+def db_write_errors(database, errors):
+    """Write log file errors to the log file database."""
+
+    cursor = database.cursor()
     cursor.executemany(
         """
         INSERT OR IGNORE INTO error_codes(error_code, error_name)
@@ -433,11 +466,13 @@ def db_write_errors(db, errors):
     """,
         errors,
     )
-    db.commit()
+    database.commit()
 
 
-def db_write_change(db, dates):
-    cursor = db.cursor()
+def db_write_change(database, dates):
+    """Write the data of PDS changes to the log file database."""
+
+    cursor = database.cursor()
     cursor.executemany(
         """
         INSERT INTO changes (date)
@@ -445,10 +480,12 @@ def db_write_change(db, dates):
     """,
         dates,
     )
-    db.commit()
+    database.commit()
 
 
 def main(db_name, log_folder):
+    """Find all new log files and summarize in log file database."""
+
     filelist = glob.glob(os.path.join(log_folder, "*-update-x-drive.log"))
     if not filelist:
         logger.error("No robocopy log files were found")
@@ -473,7 +510,8 @@ def main(db_name, log_folder):
                         continue
                 if log["finished"] is None:
                     logger.warning(
-                        "%s on %s: Robo copy had to be killed (it was copying a very large file when asked to pause)",
+                        ("%s on %s: Robo copy had to be killed "
+                        "(it was copying a very large file when asked to pause)"),
                         log["park"],
                         log["date"],
                     )
@@ -542,17 +580,17 @@ def main(db_name, log_folder):
                     except sqlite3.Error as ex:
                         logger.error("Writing stats for log %s to DB; %s", filename, ex)
                 else:
-                    # We do not expect to get stats when robo didn't finish (finished == False or None)
+                    # We do not expect to get stats when robo didn't finish
+                    # (finished == False or None)
                     if log["finished"]:
                         logger.error("No stats for log %s", filename)
 
-                # In daily processing, I want an error email when there are issues in a log file
-                #  currently even recovered errors send an error
+                # In daily processing, I want an error email when there are
+                #  issues in a log file currently even recovered errors send an error
                 if not no_errors or not no_fails or not no_mismatch:
                     logger.warning("The log file %s has errors", filename)
 
             except Exception as ex:
-                # overly broad exception catching.  I don't care what happened, I want to log the error, and continue
                 logger.error(
                     "Unexpected exception processing log file: %s, exception: %s",
                     filename,
@@ -563,6 +601,8 @@ def main(db_name, log_folder):
 
 
 def clean_folder(folder):
+    """Move processed log files to an archive folder."""
+
     year = datetime.date.today().year
     archive = str(year) + "archive"
     archive_path = os.path.join(folder, archive)
@@ -576,7 +616,6 @@ def clean_folder(folder):
             new_name = os.path.join(archive_path, os.path.basename(filename))
             os.rename(filename, new_name)
         except Exception as ex:
-            # overly broad exception catching.  I don't care what happened, I want to log the error, and continue
             logger.error(
                 "Unexpected exception moving log file: %s to archive %s, exception: %s",
                 filename,
@@ -592,7 +631,6 @@ def clean_folder(folder):
                 os.remove(new_name)
             os.rename(filename, new_name)
         except Exception as ex:
-            # overly broad exception catching.  I don't care what happened, I want to log the error, and continue
             logger.error(
                 "Unexpected exception moving log file: %s to archive %s, exception: %s",
                 filename,
@@ -602,7 +640,9 @@ def clean_folder(folder):
 
 
 def get_changes(db_name):
-    change_log = Config.change_log
+    """Determine the data of the last PDS change and write to the database."""
+
+    change_log = Config.change_log_path
     if not os.path.exists(change_log):
         logger.error("Change Log (%s) not found", change_log)
         return
@@ -632,9 +672,8 @@ def get_changes(db_name):
             if line.strip() == "----------":
                 date = previous_line[:10]
                 if max_db_date is None or date > max_db_date:
-                    dates.append(
-                        (date,)
-                    )  # add a single element tuple to the list (for the db parameter substitution)
+                    # add a single element tuple to the list (for the db parameter substitution)
+                    dates.append(date)
                 if max_db_date is not None and date <= max_db_date:
                     break
             previous_line = line
@@ -650,10 +689,8 @@ def get_changes(db_name):
 
 if __name__ == "__main__":
     try:
-        db = os.path.join(Config.log_folder, "logs.db")
-        folder = Config.log_folder
-        # clean_db(db)
-        main(db, folder)
+        # Warning: clean_db() will erase all records in the database.
+        # clean_db(Config.database_path)
+        main(Config.database_path, Config.log_folder)
     except Exception as ex:
-        # overly broad exception catching.  I don't care what happened, I need to log the exception for debugging
         logger.error("Unexpected exception: %s", ex)
