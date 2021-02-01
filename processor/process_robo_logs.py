@@ -541,7 +541,7 @@ def main(db_name, log_folder):
                                     "Bad errors object in log file %s, missing: %s in %s",
                                     filename,
                                     attrib,
-                                    str(error),
+                                    error,
                                 )
                                 continue
                         no_errors = False
@@ -614,7 +614,7 @@ def clean_folder(folder):
     """Move processed log files to an archive folder."""
 
     year = datetime.date.today().year
-    archive = str(year) + "archive"
+    archive = "{0}archive".format(year)
     archive_path = os.path.join(folder, archive)
     if not os.path.exists(archive_path):
         os.mkdir(archive_path)
