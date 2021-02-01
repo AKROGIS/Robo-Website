@@ -45,6 +45,8 @@ logger.info("Logging Started")
 
 # pylint: disable=broad-except
 # If an unexpected exception occurs, I want to log the error, and continue
+# pylint: disable=too-many-locals,too-many-branches,too-many-statements,too-many-nested-blocks
+# I know this code is a little complicated, but I'm not going to risk refactoring.
 
 def process_summary(file_handle, filename, line_num):
     """Return a records of stats for the summary section of the log file."""
@@ -237,7 +239,7 @@ def process_park(file_name):
     results["errors"] = []
     line_num = 0
     error_line_num = line_num
-    saved_error = None  # used when we are retrying an error.
+    saved_error = {}  # used when we are retrying an error.
     with open(file_name, "r", encoding="utf-8") as file_handle:
         for line in file_handle:
             try:
@@ -249,7 +251,7 @@ def process_park(file_name):
                     if saved_error and saved_error["message"] != error["message"]:
                         saved_error["failed"] = True
                         results["errors"].append(saved_error)
-                        saved_error = None
+                        saved_error = {}
                     if eof:
                         # Nothing comes next
                         results["errors"].append(error)
@@ -260,7 +262,7 @@ def process_park(file_name):
                         # (next line will be RETRY LIMIT EXCEEDED)
                         # this will only be non null when
                         #   saved_error['message'] == error['message']
-                        saved_error = None
+                        saved_error = {}
                         results["errors"].append(error)
                     else:  # error is retrying
                         # if not saved_error then saved_error['message'] == error['message'],
@@ -276,32 +278,31 @@ def process_park(file_name):
                         #      error based on retry status
                         #   4) retry succeeds: log this error: status should be non-fail
                     continue
-                else:
-                    if saved_error is not None:
-                        # this line is not an error and the last error we saw was retrying
-                        #   1) this is a repeat of the file name before the error,
-                        #      which means nothing, need to check following line
-                        #   2) this is a new filename
-                        retry_worked = line_num - error_line_num > 1
-                        if retry_worked:
-                            results["errors"].append(
-                                saved_error
-                            )  # logs a non-failing error
-                            saved_error = None
-                    if line.strip() == summary_header:
-                        summary, line_num = process_summary(
-                            file_handle, file_name, line_num
-                        )
-                        results["stats"] = summary
-                    elif line.startswith(finished_sentinal):
-                        results["finished"] = True
-                    elif line.startswith(paused_sentinal):
-                        logger.warning(
-                            "%s on %s: Robo copy not finished (paused then killed)",
-                            park,
-                            date,
-                        )
-                        results["finished"] = False
+                if saved_error:
+                    # this line is not an error and the last error we saw was retrying
+                    #   1) this is a repeat of the file name before the error,
+                    #      which means nothing, need to check following line
+                    #   2) this is a new filename
+                    retry_worked = line_num - error_line_num > 1
+                    if retry_worked:
+                        results["errors"].append(
+                            saved_error
+                        )  # logs a non-failing error
+                        saved_error = {}
+                if line.strip() == summary_header:
+                    summary, line_num = process_summary(
+                        file_handle, file_name, line_num
+                    )
+                    results["stats"] = summary
+                elif line.startswith(finished_sentinal):
+                    results["finished"] = True
+                elif line.startswith(paused_sentinal):
+                    logger.warning(
+                        "%s on %s: Robo copy not finished (paused then killed)",
+                        park,
+                        date,
+                    )
+                    results["finished"] = False
             except Exception as ex:
                 logger.error(
                     ("Unexpected exception processing log, "
