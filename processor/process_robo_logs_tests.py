@@ -13,6 +13,9 @@ import sqlite3
 
 import process_robo_logs
 
+# pylint: disable=line-too-long,pointless-string-statement
+# pylint: disable=broad-except
+# pylint: disable=too-many-locals,too-many-branches,too-many-statements
 
 r"""
 Error Formating
@@ -362,6 +365,7 @@ def test_file_structure(log_folder):
 
 
 def db_testing(db_name):
+    """Test the dtabase."""
     with sqlite3.connect(db_name) as conn:
         process_robo_logs.db_create(conn)
         log_id = process_robo_logs.db_write_log(
@@ -425,85 +429,90 @@ def db_testing(db_name):
         print(db_get_rows(conn, sql))
 
 
-def db_get_rows(db, sql, header=True):
-    cursor = db.cursor()
+def db_get_rows(database, sql, header=True):
+    """Execute the query sql in the database and return the rows."""
+
+    cursor = database.cursor()
     rows = cursor.execute(sql).fetchall()
     if header:
         return [[item[0] for item in cursor.description]] + rows
-    else:
-        return rows
+    return rows
 
 
 def test_queries(db_name):
+    """Exeute a collection of test queries."""
+
     # Date of last scan
-    q1 = "select max(date) as last_run from logs;"
+    query_1 = "select max(date) as last_run from logs;"
     # Summary of last days scan
     #  NOTE: DENA typically differs from all other parks in counts, so it is omitted
     #  NOTE: the error/finished counts may be wrong if more than a single date is considered
-    q2 = """
-SELECT l.date,
-  max(sf.total) as files_scanned, max(sd.total) as dirs_scanned,
-  max(sf.copied) as files_copied, max(sf.extra) as files_removed,
-  max(sb.copied) as bytes_copied, max(sb.extra) as bytes_removed,
-  sum(e.count_errors) as total_errors,
-  count(l1.park) as count_complete,
-  count(l2.park) as count_incomplete,
-  count(l3.park) as count_unfinished
-from logs as l
-left join stats as sf on l.log_id = sf.log_id and sf.stat = 'files' AND l.park <> 'DENA'
-left join stats as sd on l.log_id = sd.log_id and sd.stat = 'dirs' AND l.park <> 'DENA'
-left join stats as st on l.log_id = st.log_id and st.stat = 'times' AND l.park <> 'DENA'
-left join stats as sb on l.log_id = sb.log_id and sb.stat = 'bytes' AND l.park <> 'DENA'
-left join logs as l1 on l.log_id = l1.log_id and l1.finished = 1
-left join logs as l2 on l.log_id = l2.log_id and l2.finished = 0
-left join logs as l3 on l.log_id = l3.log_id and l3.finished IS NULL
-left join (select log_id, count(*) as count_errors from errors group by log_id) as e on l.log_id = e.log_id
-where l.date = (SELECT max(date) from logs)
-GROUP BY l.date;
+    query_2 = """
+        SELECT l.date,
+        max(sf.total) as files_scanned, max(sd.total) as dirs_scanned,
+        max(sf.copied) as files_copied, max(sf.extra) as files_removed,
+        max(sb.copied) as bytes_copied, max(sb.extra) as bytes_removed,
+        sum(e.count_errors) as total_errors,
+        count(l1.park) as count_complete,
+        count(l2.park) as count_incomplete,
+        count(l3.park) as count_unfinished
+        from logs as l
+        left join stats as sf on l.log_id = sf.log_id and sf.stat = 'files' AND l.park <> 'DENA'
+        left join stats as sd on l.log_id = sd.log_id and sd.stat = 'dirs' AND l.park <> 'DENA'
+        left join stats as st on l.log_id = st.log_id and st.stat = 'times' AND l.park <> 'DENA'
+        left join stats as sb on l.log_id = sb.log_id and sb.stat = 'bytes' AND l.park <> 'DENA'
+        left join logs as l1 on l.log_id = l1.log_id and l1.finished = 1
+        left join logs as l2 on l.log_id = l2.log_id and l2.finished = 0
+        left join logs as l3 on l.log_id = l3.log_id and l3.finished IS NULL
+        left join (select log_id, count(*) as count_errors from errors group by log_id) as e on l.log_id = e.log_id
+        where l.date = (SELECT max(date) from logs)
+        GROUP BY l.date;
     """
     # Park details
-    #   Could include some more failure stats, see q7 below
-    q3 = """
-select l.park, l.date, l.finished, e.count_errors,
-  sf.copied as files_copied, sf.extra as files_removed, sf.total as files_scanned,
-  st.copied as time_copying, st.extra as time_scanning, sb.copied as bytes_copied
-from logs as l
-left join stats as sf on l.log_id = sf.log_id and sf.stat = 'files'
-left join stats as st on l.log_id = st.log_id and st.stat = 'times'
-left join stats as sb on l.log_id = sb.log_id and sb.stat = 'bytes'
-left join (select log_id, count(*) as count_errors from errors group by log_id) as e on l.log_id = e.log_id
-where date = (SELECT max(date) from logs) ORDER BY Park;
-"""
+    #   Could include some more failure stats, see query_7 below
+    query_3 = """
+        select l.park, l.date, l.finished, e.count_errors,
+        sf.copied as files_copied, sf.extra as files_removed, sf.total as files_scanned,
+        st.copied as time_copying, st.extra as time_scanning, sb.copied as bytes_copied
+        from logs as l
+        left join stats as sf on l.log_id = sf.log_id and sf.stat = 'files'
+        left join stats as st on l.log_id = st.log_id and st.stat = 'times'
+        left join stats as sb on l.log_id = sb.log_id and sb.stat = 'bytes'
+        left join (select log_id, count(*) as count_errors from errors group by log_id) as e on l.log_id = e.log_id
+        where date = (SELECT max(date) from logs) ORDER BY Park;
+    """
     # Logs that did not finish normally
-    q4 = "select park, date from logs where finished = 0 or finished IS NULL order by date, park;"
+    query_4 = "select park, date from logs where finished = 0 or finished IS NULL order by date, park;"
     # Number of errors per log file
-    q5 = "select log_id, count(*) as count_errors from errors group by log_id;"
+    query_5 = "select log_id, count(*) as count_errors from errors group by log_id;"
     # Mismatch and Failed Stats per log file
-    q6 = """
-select l.date, l.park, l.finished, e.count_errors, s.stat, s.failed, s.mismatch
-from stats as s
-left join logs as l on l.log_id = s.log_id
-left join (select log_id, count(*) as count_errors from errors group by log_id) as e on l.log_id = e.log_id
-where (s.failed > 0 OR s.mismatch > 0)
-order by l.date, l.park, s.stat;
+    query_6 = """
+        select l.date, l.park, l.finished, e.count_errors, s.stat, s.failed, s.mismatch
+        from stats as s
+        left join logs as l on l.log_id = s.log_id
+        left join (select log_id, count(*) as count_errors from errors group by log_id) as e on l.log_id = e.log_id
+        where (s.failed > 0 OR s.mismatch > 0)
+        order by l.date, l.park, s.stat;
     """
     # Count of logs per day
-    q7 = "select date, count(*) from logs group by date order by date;"
+    query_7 = "select date, count(*) from logs group by date order by date;"
     # When the robocopy fail count does not equal my failed error count
-    q8 = """
-select l.park, l.date, e.count, s.failed from logs as l
-left join (select log_id, count(*) as count from errors where failed group by log_id) as e on e.log_id = l.log_id
---left join (select log_id, count(*) as count from errors where failed and error_code <> 32 group by log_id) as e on e.log_id = l.log_id
-left join stats as s on l.log_id = s.log_id
-where s.stat = 'files' and s.failed <> e.count
-order by l.date, l.park;
+    query_8 = """
+        select l.park, l.date, e.count, s.failed from logs as l
+        left join (select log_id, count(*) as count from errors
+        where failed group by log_id) as e on e.log_id = l.log_id
+        --left join (select log_id, count(*) as count from errors
+        --where failed and error_code <> 32 group by log_id) as e on e.log_id = l.log_id
+        left join stats as s on l.log_id = s.log_id
+        where s.stat = 'files' and s.failed <> e.count
+        order by l.date, l.park;
     """
     # for logs without a failure, copied + extra times = total time, mismatch and skipped = 0
-    q9 = """
-select l.park, count(*), avg(s.copied), avg(s.extra), avg(s.skipped), avg(failed), avg(s.total), avg(s.copied)+avg(s.extra) from stats as s
-left join logs as l on s.log_id = l.log_id
-where s.stat = 'times' -- and s.log_id in (select log_id from stats where stat = 'bytes' and failed = 0)
-group by l.park order by l.park;
+    query_9 = """
+        select l.park, count(*), avg(s.copied), avg(s.extra), avg(s.skipped), avg(failed), avg(s.total), avg(s.copied)+avg(s.extra) from stats as s
+        left join logs as l on s.log_id = l.log_id
+        where s.stat = 'times' -- and s.log_id in (select log_id from stats where stat = 'bytes' and failed = 0)
+        group by l.park order by l.park;
     """
     # Other query ideas:
     #   Last error by Park
@@ -512,8 +521,19 @@ group by l.park order by l.park;
     #   Speed Comparison by Park, no updates, small, medium and large updates
 
     with sqlite3.connect(db_name) as conn:
-        for q in [q1, q2, q3, q4, q5, q6, q7, q8, q9]:
-            for row in db_get_rows(conn, q):
+        queries = [
+            query_1,
+            query_2,
+            query_3,
+            query_4,
+            query_5,
+            query_6,
+            query_7,
+            query_8,
+            query_9,
+        ]
+        for query in queries:
+            for row in db_get_rows(conn, query):
                 # error = row[0].split(') ')[1].strip()
                 # code = int(row[0].split(' ERROR ')[1].split()[0])
                 # print('{0:3d}|{1}'.format(code,error))

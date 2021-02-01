@@ -48,6 +48,7 @@ logger.info("Logging Started")
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements,too-many-nested-blocks
 # I know this code is a little complicated, but I'm not going to risk refactoring.
 
+
 def process_summary(file_handle, filename, line_num):
     """Return a records of stats for the summary section of the log file."""
 
@@ -64,8 +65,10 @@ def process_summary(file_handle, filename, line_num):
             results[key] = process_summary_line(line, text, filename, line_num)
         except Exception as ex:
             logger.error(
-                ("Unexpected exception processing summary, "
-                "file: %s, line#: %d, key: %s, text: %s, line: %s, exception: %s"),
+                (
+                    "Unexpected exception processing summary, "
+                    "file: %s, line#: %d, key: %s, text: %s, line: %s, exception: %s"
+                ),
                 filename,
                 line_num,
                 key,
@@ -181,8 +184,10 @@ def process_error(file_handle, filename, line, line_num, error_sentinal):
             )
     except Exception as ex:
         logger.error(
-            ("Unexpected exception processing error lines in log "
-            "file: %s, line#: %d, line: %s, exception: %s"),
+            (
+                "Unexpected exception processing error lines in log "
+                "file: %s, line#: %d, line: %s, exception: %s"
+            ),
             filename,
             line_num,
             line,
@@ -305,8 +310,10 @@ def process_park(file_name):
                     results["finished"] = False
             except Exception as ex:
                 logger.error(
-                    ("Unexpected exception processing log, "
-                    "file: %s, line#: %d, line: %s, exception: %s"),
+                    (
+                        "Unexpected exception processing log, "
+                        "file: %s, line#: %d, line: %s, exception: %s"
+                    ),
                     file_name,
                     line_num,
                     line,
@@ -511,8 +518,10 @@ def main(db_name, log_folder):
                         continue
                 if log["finished"] is None:
                     logger.warning(
-                        ("%s on %s: Robo copy had to be killed "
-                        "(it was copying a very large file when asked to pause)"),
+                        (
+                            "%s on %s: Robo copy had to be killed "
+                            "(it was copying a very large file when asked to pause)"
+                        ),
                         log["park"],
                         log["date"],
                     )
