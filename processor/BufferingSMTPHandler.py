@@ -23,15 +23,19 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 This file is part of the Python logging distribution. See
 http://www.red-dove.com/python_logging.html
 """
-import string
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import logging
 import logging.handlers
+import smtplib
+
+# pylint: disable=too-many-arguments,bare-except
 
 
 class BufferingSMTPHandler(logging.handlers.BufferingHandler):
+    """A logging handler that buffers (aggregates) SMTP messages."""
+
     def __init__(self, mailhost, fromaddr, toaddrs, subject, capacity=100):
         logging.handlers.BufferingHandler.__init__(self, capacity)
         self.mailhost = mailhost
@@ -42,20 +46,20 @@ class BufferingSMTPHandler(logging.handlers.BufferingHandler):
         self.setFormatter(logging.Formatter("%(asctime)s %(levelname)-5s %(message)s"))
 
     def flush(self):
+        """Flush the aggregated messages to the SMTP server."""
         if len(self.buffer) > 0:
-            # noinspection PyBroadException
             try:
-                import smtplib
                 port = self.mailport
                 if not port:
                     port = smtplib.SMTP_PORT
                 smtp = smtplib.SMTP(self.mailhost, port)
-                msg = "From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n" % (self.fromaddr,
-                                                                     string.join(self.toaddrs, ","),
-                                                                     self.subject)
+                msg = "From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n" % (
+                    self.fromaddr,
+                    self.toaddrs.join(","),
+                    self.subject,
+                )
                 for record in self.buffer:
-                    s = self.format(record)
-                    msg = msg + s + "\r\n"
+                    msg += self.format(record) + "\r\n"
                 smtp.sendmail(self.fromaddr, self.toaddrs, msg)
                 smtp.quit()
             except:
