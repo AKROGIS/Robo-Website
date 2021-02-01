@@ -73,6 +73,9 @@ class Config(object):
 class SQLiteHandler(logging.Handler):
     """Thread-safe logging handler for SQLite."""
 
+    # issues cannot be corrected without breaking the class contract.
+    # pylint: disable=invalid-name,no-self-use,protected-access
+
     def __init__(self, db="app.db"):
         logging.Handler.__init__(self)
         self.db = db
