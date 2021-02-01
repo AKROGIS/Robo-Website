@@ -117,8 +117,8 @@ Other Weird files
         All but the following cases are with error 32 not being counted as a fail by robocopy,
         but I count it (a remote file that can't be deleted); mostly this is lock files at DENA,
         or files at KLGO after a semaphore (121) error
-      2018-11-20_22-00-02-KLGO-update-x-drive.log: line 147, a semaphore (121) error is not retried is not retired, so I call it a fail, robo does not
-      2018-11-22_22-00-02-KLGO-update-x-drive.log: Got 357 hard (ERROR: RETRY LIMIT EXCEEDED.) fails (I only couned 351), but robo only counted 76 (and 14 dirs)
+      2018-11-20_22-00-02-KLGO-update-x-drive.log: line 147, a semaphore (121) error is not retried is not retired, so I call it a fail, robocopy does not
+      2018-11-22_22-00-02-KLGO-update-x-drive.log: Got 357 hard (ERROR: RETRY LIMIT EXCEEDED.) fails (I only counted 351), but robocopy only counted 76 (and 14 dirs)
       NOME|2018-05-19|150|77
       KOTZ|2018-07-02|9|8
 """
@@ -151,7 +151,7 @@ def test_file_structure(log_folder):
         121 => The semaphore timeout period has expired.
     }"""
     relations = {}
-    """Expecting: on Mac log data (upto 11/28/2018)
+    """Expecting: on Mac log data (up to 11/28/2018)
         (u'blank', u'blank') => 2520
         (u'blank', u'divider2') => 3233
         (u'blank', u'error') => 793
@@ -365,7 +365,7 @@ def test_file_structure(log_folder):
 
 
 def db_testing(db_name):
-    """Test the dtabase."""
+    """Test the database."""
     with sqlite3.connect(db_name) as conn:
         process_robo_logs.db_create(conn)
         log_id = process_robo_logs.db_write_log(
@@ -440,7 +440,7 @@ def db_get_rows(database, sql, header=True):
 
 
 def test_queries(db_name):
-    """Exeute a collection of test queries."""
+    """Execute a collection of test queries."""
 
     # Date of last scan
     query_1 = "select max(date) as last_run from logs;"

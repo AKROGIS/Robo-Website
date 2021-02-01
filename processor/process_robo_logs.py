@@ -79,7 +79,7 @@ def process_summary(file_handle, filename, line_num):
     return results, line_num
 
 
-def process_summary_line(line, sentinal, filename, line_num):
+def process_summary_line(line, sentinel, filename, line_num):
     """Return a records of stats for a line in the summary section of the log file."""
 
     count_obj = {}
@@ -90,10 +90,10 @@ def process_summary_line(line, sentinal, filename, line_num):
     count_obj["failed"] = -1
     count_obj["extra"] = -1
 
-    if sentinal not in line:
+    if sentinel not in line:
         logger.error(
             'Summary for "%s" is missing in line: %s, file: %s, line#: %d',
-            sentinal,
+            sentinel,
             line,
             filename,
             line_num,
@@ -101,8 +101,8 @@ def process_summary_line(line, sentinal, filename, line_num):
         return count_obj
 
     try:
-        clean_line = line.replace(sentinal, "")
-        if sentinal == "Bytes :":
+        clean_line = line.replace(sentinel, "")
+        if sentinel == "Bytes :":
             counts = [
                 int(float(item))
                 for item in clean_line.replace(" t", "e12")
@@ -111,7 +111,7 @@ def process_summary_line(line, sentinal, filename, line_num):
                 .replace(" k", "e3")
                 .split()
             ]
-        elif sentinal == "Times :":
+        elif sentinel == "Times :":
             clean_line = clean_line.replace("          ", "   0:00:00")
             times = [time.strptime(item, "%H:%M:%S") for item in clean_line.split()]
             counts = [t.tm_hour * 3600 + t.tm_min * 60 + t.tm_sec for t in times]
@@ -127,7 +127,7 @@ def process_summary_line(line, sentinal, filename, line_num):
     except Exception as ex:
         logger.error(
             "Parsing summary for %s in line: %s, file: %s, line#: %d, exception: %s",
-            sentinal,
+            sentinel,
             line,
             filename,
             line_num,
@@ -137,10 +137,10 @@ def process_summary_line(line, sentinal, filename, line_num):
     return count_obj
 
 
-def process_error(file_handle, filename, line, line_num, error_sentinal):
+def process_error(file_handle, filename, line, line_num, error_sentinel):
     """Return information about a error in the log file."""
 
-    code, message = parse_error_line(line, filename, line_num, error_sentinal)
+    code, message = parse_error_line(line, filename, line_num, error_sentinel)
     error_line_num = line_num
     if not code:
         logger.error(
@@ -206,13 +206,13 @@ def process_error(file_handle, filename, line, line_num, error_sentinal):
     return (error, eof, retry, line_num)
 
 
-def parse_error_line(line, filename, line_num, error_sentinal):
+def parse_error_line(line, filename, line_num, error_sentinel):
     """Return information about one line in a error section of the log file."""
 
     code = 0
     message = "Message not defined"
     try:
-        code = int(line.split(error_sentinal)[1].split()[0])
+        code = int(line.split(error_sentinel)[1].split()[0])
         message = line.split(") ")[1].strip()
     except Exception as ex:
         logger.error(
@@ -229,9 +229,9 @@ def process_park(file_name):
     """Return statistics for a single log file (each park is logged separately)."""
 
     summary_header = "Total    Copied   Skipped  Mismatch    FAILED    Extras"
-    error_sentinal = " ERROR "
-    finished_sentinal = "   Ended : "
-    paused_sentinal = "    Hours : Paused at 06:"
+    error_sentinel = " ERROR "
+    finished_sentinel = "   Ended : "
+    paused_sentinel = "    Hours : Paused at 06:"
 
     results = {}
     basename = os.path.basename(file_name)
@@ -249,9 +249,9 @@ def process_park(file_name):
         for line in file_handle:
             try:
                 line_num += 1
-                if error_sentinal in line:
+                if error_sentinel in line:
                     error, eof, retry, line_num = process_error(
-                        file_handle, file_name, line, line_num, error_sentinal
+                        file_handle, file_name, line, line_num, error_sentinel
                     )
                     if saved_error and saved_error["message"] != error["message"]:
                         saved_error["failed"] = True
@@ -299,11 +299,11 @@ def process_park(file_name):
                         file_handle, file_name, line_num
                     )
                     results["stats"] = summary
-                elif line.startswith(finished_sentinal):
+                elif line.startswith(finished_sentinel):
                     results["finished"] = True
-                elif line.startswith(paused_sentinal):
+                elif line.startswith(paused_sentinel):
                     logger.warning(
-                        "%s on %s: Robo copy not finished (paused then killed)",
+                        "%s on %s: Robocopy not finished (paused then killed)",
                         park,
                         date,
                     )
@@ -519,7 +519,7 @@ def main(db_name, log_folder):
                 if log["finished"] is None:
                     logger.warning(
                         (
-                            "%s on %s: Robo copy had to be killed "
+                            "%s on %s: Robocopy had to be killed "
                             "(it was copying a very large file when asked to pause)"
                         ),
                         log["park"],
@@ -590,7 +590,7 @@ def main(db_name, log_folder):
                     except sqlite3.Error as ex:
                         logger.error("Writing stats for log %s to DB; %s", filename, ex)
                 else:
-                    # We do not expect to get stats when robo didn't finish
+                    # We do not expect to get stats when robocopy didn't finish
                     # (finished == False or None)
                     if log["finished"]:
                         logger.error("No stats for log %s", filename)

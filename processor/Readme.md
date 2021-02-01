@@ -31,7 +31,7 @@ helpful if a new version of robocopy changes the format of the log file.
 
 A python 2.7 file that reads unprocessed logs in the
 [log folder](https://github.com/AKROGIS/Robo-Website/blob/master/processor/process_robo_logs.py#L16)
-and the 
+and the
 [PDS change log](https://github.com/AKROGIS/Robo-Website/blob/master/processor/process_robo_logs.py#L17)
 and writes results to the
 [log database](https://github.com/AKROGIS/Robo-Website/blob/master/processor/process_robo_logs.py#L485).
@@ -64,4 +64,4 @@ python interpreter and the script working directory at the bottom of
 this file.  The password for the service account that should run this task
 is in the GIS Team password keeper, however the account is not a
 login account and it is managed by IT.  Contact IT if the password expires.
-**NOTE: When the pasword expires, the task will stop running.**
+**NOTE: When the password expires, the task will stop running.**

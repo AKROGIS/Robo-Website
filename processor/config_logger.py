@@ -34,7 +34,7 @@ config = {
             "class": "logging.FileHandler",
             "level": "INFO",
             "formatter": "detailed",
-            "filename": "E:/Xdrive/Logs/LogProcessor.log",
+            "filename": "E:/XDrive/Logs/LogProcessor.log",
         },
         "email": {
             # Bundle 100 messages into a single email
@@ -51,7 +51,7 @@ config = {
         "sqlite": {
             "class": "sqlite_handler.SQLiteHandler",
             "level": "ERROR",
-            "db": "E:/Xdrive/Logs/logs.db",
+            "db": "E:/XDrive/Logs/logs.db",
         },
     },
     "root": {

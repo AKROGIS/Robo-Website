@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-An HTTP server which publishes stats about the robo copy logs database.
+An HTTP server which publishes stats about the robocopy logs database.
 
 Edit the Config object below as needed for each execution.
 """
@@ -49,7 +49,7 @@ class SyncHandler(BaseHTTPRequestHandler):
     """A simple HTTP server."""
 
     db_name = Config.log_database
-    name = "Xdrive RoboCopy Log Details"
+    name = "XDrive RoboCopy Log Details"
     usage = """
         Usage:
             GET with /summary or summary?date=YYYY-MM-DD to get the log summary

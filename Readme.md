@@ -56,7 +56,7 @@ processor.
 deployed.  See `Projects\AKR\ArcGIS Server` in the GIS Team network drive for
 details on obtaining and deploying the certificates. The certificate file
 names must match
-[secure_server.py](https://github.com/AKROGIS/Robo-Website/blob/master/server/secure_server.py#L476).
+[secure_server.py](https://github.com/AKROGIS/Robo-Website/blob/master/server/secure_server.py#L506).
 
 * Create and deploy a scheduled task to start this task when the server
 restarts, and if the task ever dies (it should run forever).  The task
@@ -65,7 +65,7 @@ See the file `server/server\X Drive - RoboLog Secure Data Service.xml`
 (a windows scheduled task export file).  The password for the service
 account is in the GIS Team password keeper, however the account is not a
 login account and it is managed by IT.  Contact IT if the password expires.
-**NOTE: When the pasword expires, the task will stop running.**
+**NOTE: When the password expires, the task will stop running.**
 
 * If TLS certificates expire, you can copy `secure_server.py` to `server.py`
 and change the config section (set `secure = False`) to make it an `http` and
@@ -102,7 +102,7 @@ The data manager should check the website daily for issues.
 
 #### Robocopy Issues
 
-Most robobopy issues are temporary (remote server down, or intermittent
+Most robocopy issues are temporary (remote server down, or intermittent
 network issues).  Issues that persist can usually be resolved by contacting
 park IT staff.
 
