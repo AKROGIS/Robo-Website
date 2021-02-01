@@ -12,16 +12,16 @@ import sqlite3
 import process_robo_logs
 
 # Mac
-#LOG_ROOT = 'data/Logs/old'
-#DB = 'data/logs.db'
+# LOG_ROOT = 'data/Logs/old'
+# DB = 'data/logs.db'
 
 # Workstation (PC)
-LOG_ROOT = r'\\inpakrovmais\Xdrive\Logs\2018archive'
-DB = r'\\inpakrovmais\Xdrive\Logs\logs.db'
+LOG_ROOT = r"\\inpakrovmais\Xdrive\Logs\2018archive"
+DB = r"\\inpakrovmais\Xdrive\Logs\logs.db"
 
 # Server
-#LOG_ROOT = 'E:/XDrive/Logs'
-#DB = 'E:/XDrive/Logs/logs.db'
+# LOG_ROOT = 'E:/XDrive/Logs'
+# DB = 'E:/XDrive/Logs/logs.db'
 
 r"""
 Error Formating
@@ -132,16 +132,16 @@ Other Weird files
 
 def test_file_structure(log_folder):
     """
-        Line types (in body, i.e. not header or stats):
-        clean_line = line.strip()
-        * blank: not clean_line
-        * file: clean_line.startswith('E:\\') or clean_line.startswith(r'\\inpak')
-        * error: ' ERROR ' in clean_line
-        * error name: always follows error line
-        * retry: clean_line.endswith('... Retrying...')
-        * fail: clean_line == 'ERROR: RETRY LIMIT EXCEEDED.'
-        * pause: clean_line.startswith('Hours : Paused at')
-        * divider: clean_line.startswith('-------------')  # at end of header before stats (and around title)
+    Line types (in body, i.e. not header or stats):
+    clean_line = line.strip()
+    * blank: not clean_line
+    * file: clean_line.startswith('E:\\') or clean_line.startswith(r'\\inpak')
+    * error: ' ERROR ' in clean_line
+    * error name: always follows error line
+    * retry: clean_line.endswith('... Retrying...')
+    * fail: clean_line == 'ERROR: RETRY LIMIT EXCEEDED.'
+    * pause: clean_line.startswith('Hours : Paused at')
+    * divider: clean_line.startswith('-------------')  # at end of header before stats (and around title)
     """
     errors = {}
     """ Expecting: {
@@ -231,41 +231,41 @@ def test_file_structure(log_folder):
         (u'retry', u'file', u'file') => 28
         (u'unknown', u'divider1', u'blank') => 3573
     """
-    filelist = glob.glob(os.path.join(log_folder, '2018-*-update-x-drive.log'))
+    filelist = glob.glob(os.path.join(log_folder, "2018-*-update-x-drive.log"))
     for filename in filelist:
         try:
-            with open(filename, 'r', encoding="utf-8") as file_handle:
-                previous_line = 'unknown'
+            with open(filename, "r", encoding="utf-8") as file_handle:
+                previous_line = "unknown"
                 p2_line = previous_line
                 in_header = True
                 # first 3 lines are always the same
                 file_handle.readline()  #
-                file_handle.readline()  #-------------------------------------------------------------------------------
+                file_handle.readline()  # -------------------------------------------------------------------------------
                 file_handle.readline()  #   ROBOCOPY     ::     Robust File Copy for Windows
-                file_handle.readline()  #-------------------------------------------------------------------------------
+                file_handle.readline()  # -------------------------------------------------------------------------------
                 line_num = 3
                 for line in file_handle:
-                    line_type = 'unknown'
+                    line_type = "unknown"
                     try:
                         line_num += 1
                         clean_line = line.strip()
-                        divider_line = clean_line.startswith('-------------')
+                        divider_line = clean_line.startswith("-------------")
                         if in_header and not divider_line:
-                            continue  #skip the variable length header
+                            continue  # skip the variable length header
                         if in_header and divider_line:
                             in_header = False
                             p2_line = previous_line
-                            previous_line = 'divider1'
+                            previous_line = "divider1"
                             continue
                         if not in_header and divider_line:
                             # start stats (verify)
-                            file_handle.next() # blankline
+                            file_handle.next()  # blankline
                             stats_line = file_handle.next().strip()
-                            if not stats_line.startswith('Total'):
-                                print('fail in stats in {0}'.format(filename))
-                            line_type = 'divider2'
+                            if not stats_line.startswith("Total"):
+                                print("fail in stats in {0}".format(filename))
+                            line_type = "divider2"
                             # key = (previous_line,line_type)
-                            key = (p2_line, previous_line,line_type)
+                            key = (p2_line, previous_line, line_type)
                             if key not in relations:
                                 relations[key] = 0
                             relations[key] += 1
@@ -274,86 +274,161 @@ def test_file_structure(log_folder):
                             break
                         blank_line = not clean_line
                         if blank_line:
-                            if line_type != 'unknown':
-                                print('line is already defined {0} to {1} at {2} in {3}'.format(line_type, 'blank', line_num, filename))
-                            line_type = 'blank'
-                        file_line = clean_line.startswith('E:\\') or clean_line.startswith(r'\\inpak')
+                            if line_type != "unknown":
+                                print(
+                                    "line is already defined {0} to {1} at {2} in {3}".format(
+                                        line_type, "blank", line_num, filename
+                                    )
+                                )
+                            line_type = "blank"
+                        file_line = clean_line.startswith(
+                            "E:\\"
+                        ) or clean_line.startswith(r"\\inpak")
                         if file_line:
-                            if line_type != 'unknown':
-                                print('line is already defined {0} to {1} at {2} in {3}'.format(line_type, 'file', line_num, filename))
-                            line_type = 'file'
-                        retry_line = clean_line.endswith('... Retrying...')
+                            if line_type != "unknown":
+                                print(
+                                    "line is already defined {0} to {1} at {2} in {3}".format(
+                                        line_type, "file", line_num, filename
+                                    )
+                                )
+                            line_type = "file"
+                        retry_line = clean_line.endswith("... Retrying...")
                         if retry_line:
-                            if line_type != 'unknown':
-                                print('line is already defined {0} to {1} at {2} in {3}'.format(line_type, 'retry', line_num, filename))
-                            line_type = 'retry'
-                        fail_line = clean_line == 'ERROR: RETRY LIMIT EXCEEDED.'
+                            if line_type != "unknown":
+                                print(
+                                    "line is already defined {0} to {1} at {2} in {3}".format(
+                                        line_type, "retry", line_num, filename
+                                    )
+                                )
+                            line_type = "retry"
+                        fail_line = clean_line == "ERROR: RETRY LIMIT EXCEEDED."
                         if fail_line:
-                            if line_type != 'unknown':
-                                print('line is already defined {0} to {1} at {2} in {3}'.format(line_type, 'fail', line_num, filename))
-                            line_type = 'fail'
-                        pause_line = clean_line.startswith('Hours : Paused at')
+                            if line_type != "unknown":
+                                print(
+                                    "line is already defined {0} to {1} at {2} in {3}".format(
+                                        line_type, "fail", line_num, filename
+                                    )
+                                )
+                            line_type = "fail"
+                        pause_line = clean_line.startswith("Hours : Paused at")
                         if pause_line:
-                            if line_type != 'unknown':
-                                print('line is already defined {0} to {1} at {2} in {3}'.format(line_type, 'pause', line_num, filename))
-                            line_type = 'pause'
-                        error_line = ' ERROR ' in clean_line
+                            if line_type != "unknown":
+                                print(
+                                    "line is already defined {0} to {1} at {2} in {3}".format(
+                                        line_type, "pause", line_num, filename
+                                    )
+                                )
+                            line_type = "pause"
+                        error_line = " ERROR " in clean_line
                         if error_line:
-                            if line_type != 'unknown':
-                                print('line is already defined {0} to {1} at {2} in {3}'.format(line_type, 'error', line_num, filename))
-                            line_type = 'error'
-                            code = int(line.split(' ERROR ')[1].split()[0])
+                            if line_type != "unknown":
+                                print(
+                                    "line is already defined {0} to {1} at {2} in {3}".format(
+                                        line_type, "error", line_num, filename
+                                    )
+                                )
+                            line_type = "error"
+                            code = int(line.split(" ERROR ")[1].split()[0])
                             desc = file_handle.next().strip()
                             line_num += 1
                             if code in errors:
                                 if errors[code] != desc:
-                                    print('error code mismatch got {2} expecting {3} for {4} at line {0} in {1}'.format(line_num, filename, desc, errors[code], code))
+                                    print(
+                                        "error code mismatch got {2} expecting {3} for {4} at line {0} in {1}".format(
+                                            line_num, filename, desc, errors[code], code
+                                        )
+                                    )
                             else:
                                 errors[code] = desc
-                        if line_type == 'unknown':
-                            print('Line type is unknown in {0}'.format(filename))
+                        if line_type == "unknown":
+                            print("Line type is unknown in {0}".format(filename))
                         # key = (previous_line,line_type)
-                        key = (p2_line, previous_line,line_type)
+                        key = (p2_line, previous_line, line_type)
                         if key not in relations:
                             relations[key] = 0
                         relations[key] += 1
                         p2_line = previous_line
                         previous_line = line_type
                     except Exception as ex:
-                        print('exception {2} at line {0} in {1}'.format(line_num, filename, ex))
+                        print(
+                            "exception {2} at line {0} in {1}".format(
+                                line_num, filename, ex
+                            )
+                        )
                 # key = (previous_line, 'EOF')
-                key = (p2_line, previous_line, 'EOF')
+                key = (p2_line, previous_line, "EOF")
                 if key not in relations:
                     relations[key] = 0
                 relations[key] += 1
         except Exception as ex:
-            print('exception {1} in {0}'.format(filename, ex))
+            print("exception {1} in {0}".format(filename, ex))
     keys = sorted(errors.keys())
     for key in keys:
-        print('  {0} => {1}'.format(key, errors[key]))
+        print("  {0} => {1}".format(key, errors[key]))
     keys = sorted(relations.keys())
     for key in keys:
-        print('  {0} => {1}'.format(key, relations[key]))
-
-
+        print("  {0} => {1}".format(key, relations[key]))
 
 
 def db_testing(db_name):
     with sqlite3.connect(db_name) as conn:
         process_robo_logs.db_create(conn)
-        log_id = process_robo_logs.db_write_log(conn,
-            #{'park':'DENA', 'date':'2018-02-12', 'filename':'C:/tmp/test.log', 'finished':True}
-            {'park':'DENA', 'date':'2018-02-12', 'filename':'C:/tmp/test.log', 'finished':True}
+        log_id = process_robo_logs.db_write_log(
+            conn,
+            # {'park':'DENA', 'date':'2018-02-12', 'filename':'C:/tmp/test.log', 'finished':True}
+            {
+                "park": "DENA",
+                "date": "2018-02-12",
+                "filename": "C:/tmp/test.log",
+                "finished": True,
+            },
         )
-        process_robo_logs.db_write_stats(conn,
+        process_robo_logs.db_write_stats(
+            conn,
             [
-                {'log':log_id, 'stat': u'dirs', u'skipped': 3, u'extra': 2, u'mismatch': 0, u'failed': 0, u'copied': 0, u'total': 4711},
-                {'log':log_id, 'stat': u'files', u'skipped': 234433, u'extra': 0, u'mismatch': 0, u'failed': 0, u'copied': 0, u'total': 234433},
-                {'log':log_id, 'stat': u'bytes', u'skipped': 557141000000, u'extra': 0, u'mismatch': 0, u'failed': 0, u'copied': 0, u'total': 557141000000},
-                {'log':log_id, 'stat': u'times', u'skipped': 0, u'extra': 212, u'mismatch': 0, u'failed': 0, u'copied': 0, u'total': 212}
-            ]
+                {
+                    "log": log_id,
+                    "stat": "dirs",
+                    "skipped": 3,
+                    "extra": 2,
+                    "mismatch": 0,
+                    "failed": 0,
+                    "copied": 0,
+                    "total": 4711,
+                },
+                {
+                    "log": log_id,
+                    "stat": "files",
+                    "skipped": 234433,
+                    "extra": 0,
+                    "mismatch": 0,
+                    "failed": 0,
+                    "copied": 0,
+                    "total": 234433,
+                },
+                {
+                    "log": log_id,
+                    "stat": "bytes",
+                    "skipped": 557141000000,
+                    "extra": 0,
+                    "mismatch": 0,
+                    "failed": 0,
+                    "copied": 0,
+                    "total": 557141000000,
+                },
+                {
+                    "log": log_id,
+                    "stat": "times",
+                    "skipped": 0,
+                    "extra": 212,
+                    "mismatch": 0,
+                    "failed": 0,
+                    "copied": 0,
+                    "total": 212,
+                },
+            ],
         )
-        sql = 'SELECT * FROM stats JOIN logs on stats.log_id = logs.log_id;'
+        sql = "SELECT * FROM stats JOIN logs on stats.log_id = logs.log_id;"
         print(db_get_rows(conn, sql))
         process_robo_logs.db_clear(conn, drop=False)
         print(db_get_rows(conn, sql))
@@ -454,16 +529,15 @@ group by l.park order by l.park;
                 print(row)
 
 
-if __name__ == '__main__':
-    #db_testing(':memory:')
-    #test_queries(DB)
+if __name__ == "__main__":
+    # db_testing(':memory:')
+    # test_queries(DB)
     test_file_structure(LOG_ROOT)
 
-
-    #print(process_park(r"\\inpakrovmais\Xdrive\Logs\2018archive\2018-12-16_18-00-01-LACL-update-x-drive.log")) # checked: ok
+    # print(process_park(r"\\inpakrovmais\Xdrive\Logs\2018archive\2018-12-16_18-00-01-LACL-update-x-drive.log")) # checked: ok
     # [{u'failed': True, u'message': u'Accessing Destination Directory E:\\XDrive\\RemoteServers\\XDrive-LACL\\', u'code': 67, u'name': 'The network name cannot be found.', u'line_num': 36}]
-    #print(process_park(r"\\inpakrovmais\Xdrive\Logs\2018archive\2018-02-08_22-00-02-LACL-update-x-drive.log")) # checked: ok
-    # [{u'failed': True, u'message': u'Accessing Destination Directory E:\\XDrive\\RemoteServers\\XDrive-LACL\\', u'code': 53, u'name': 'The network path was not found.', u'line_num': 34}, 
+    # print(process_park(r"\\inpakrovmais\Xdrive\Logs\2018archive\2018-02-08_22-00-02-LACL-update-x-drive.log")) # checked: ok
+    # [{u'failed': True, u'message': u'Accessing Destination Directory E:\\XDrive\\RemoteServers\\XDrive-LACL\\', u'code': 53, u'name': 'The network path was not found.', u'line_num': 34},
     #  {u'failed': True, u'message': u'Accessing Destination Directory E:\\XDrive\\RemoteServers\\XDrive-LACL\\', u'code': 53, u'name': 'The network path was not found.', u'line_num': 54}]
     # print(process_park(r"\\inpakrovmais\Xdrive\Logs\2018archive\2018-10-02_22-00-03-DENA-update-x-drive.log")) # checked: ok
     # print(process_park(r"\\inpakrovmais\Xdrive\Logs\2018archive\2018-12-10_22-00-03-YUGA-update-x-drive.log")) # checked: ok
@@ -473,5 +547,3 @@ if __name__ == '__main__':
     # print(process_park(r"\\inpakrovmais\Xdrive\Logs\2018archive\2018-11-20_22-00-02-KLGO-update-x-drive.log")) # checked: ok
     # print(process_park(r"\\inpakrovmais\Xdrive\Logs\2018archive\2018-11-22_22-00-02-KLGO-update-x-drive.log")) # checked: ok
     # print(process_park(r"\\inpakrovmais\Xdrive\Logs\2018archive\2018-01-30_22-00-01-LACL-update-x-drive.log")) # checked: ok
-
-

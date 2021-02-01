@@ -63,7 +63,7 @@ class SQLiteHandler(logging.Handler):
     Thread-safe logging handler for SQLite.
     """
 
-    def __init__(self, db='app.db'):
+    def __init__(self, db="app.db"):
         logging.Handler.__init__(self)
         self.db = db
         conn = sqlite3.connect(self.db)
@@ -74,7 +74,9 @@ class SQLiteHandler(logging.Handler):
         """
         Create a time stamp
         """
-        record.dbtime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(record.created))
+        record.dbtime = time.strftime(
+            "%Y-%m-%d %H:%M:%S", time.localtime(record.created)
+        )
 
     def format_msg(self, record):
         """
