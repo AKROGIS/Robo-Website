@@ -28,8 +28,8 @@ config = {
             'filename':  'E:/Xdrive/Logs/LogProcessor.log'
         },
         'email': {
-            'class':    'BufferingSMTPHandler.BufferingSMTPHandler',  # Bundle 100 messages into a single email
             # 'class':    'logging.handlers.SMTPHandler',  # Separate email for each message
+            "class": "buffering_smtp_handler.BufferingSMTPHandler",
             'level':     'ERROR',
             'formatter': 'detailed',
             'mailhost': 'mailer.itc.nps.gov',
