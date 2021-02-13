@@ -367,48 +367,6 @@ function plotline (x, l1, y1, title) {
   Plotly.newPlot('graph_div', [trace1], layout)
 }
 
-function plot5lines (x, l1, y1, l2, y2, l3, y3, l4, y4, l5, y5, title) {
-  const trace1 = {
-    x: x,
-    y: y1,
-    name: l1,
-    type: 'scatter',
-    mode: 'lines'
-  }
-  const trace2 = {
-    x: x,
-    y: y2,
-    name: l2,
-    type: 'scatter',
-    mode: 'lines'
-  }
-  const trace3 = {
-    x: x,
-    y: y3,
-    name: l3,
-    type: 'scatter',
-    mode: 'lines'
-  }
-  const trace4 = {
-    x: x,
-    y: y4,
-    name: l4,
-    type: 'scatter',
-    mode: 'lines'
-  }
-  const trace5 = {
-    x: x,
-    y: y5,
-    name: l5,
-    type: 'scatter',
-    mode: 'lines'
-  }
-  const layout = {
-    title: title
-  }
-  Plotly.newPlot('graph_div', [trace1, trace2, trace3, trace4, trace5], layout)
-}
-
 function unpack (rows, key) {
   return rows.map(function (row) {
     return row[key]
@@ -478,24 +436,14 @@ function plot5 (data) {
   document.getElementById('graph_div').hidden = false
   document.getElementById('park_picker').hidden = false
   const park = data[0][0]
-  const title = 'Historic speeds for ' + park
-  plot5lines(
+  const title = 'Copy Speed (kB/sec) for ' + park
+  plotline(
     // data 0 has the park name
     unpack(data, 1),
-    'Scan Speed (files/s)',
-    unpack(data, 2),
     'Copy Speed (kB/s)',
     unpack(data, 3),
-    'Avg Size of File (kB)',
-    unpack(data, 4),
-    'Copy Size (files)',
-    unpack(data, 5),
-    'Copy Size (MBytes)',
-    unpack(data, 6),
     title
   )
-  document.getElementById('graph_wait').hidden = true
-  document.getElementById('graph_div').hidden = false
 }
 
 function getPlotDataFail (err) {
