@@ -566,6 +566,13 @@ function plotParks3 () {
 function plotParks4 () {
   prepForNewGraph()
   document.getElementById('graph_fail').hidden = true
+  const element = document.getElementById('park_select')
+  element.removeEventListener('change', refreshPlot5)
+  element.addEventListener('change', refreshPlot4)
+  refreshPlot4()
+}
+
+function refreshPlot4 () {
   const date = document.getElementById('page_date').textContent
   const park = document.getElementById('park_select').value
   const url = dataServer + '/speed?park=' + park + '&start=2018-09-01&end=' + date
@@ -575,7 +582,14 @@ function plotParks4 () {
 // eslint-disable-next-line no-unused-vars
 function plotParks5 () {
   prepForNewGraph()
+  const element = document.getElementById('park_select')
+  element.removeEventListener('change', refreshPlot4)
+  element.addEventListener('change', refreshPlot5)
   document.getElementById('graph_fail').hidden = true
+  refreshPlot5()
+}
+
+function refreshPlot5 () {
   const date = document.getElementById('page_date').textContent
   const park = document.getElementById('park_select').value
   const url = dataServer + '/speed?park=' + park + '&start=2018-09-01&end=' + date
