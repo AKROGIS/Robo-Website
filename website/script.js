@@ -393,6 +393,7 @@ function plot1 (data) {
 function plot2 (data) {
   document.getElementById('graph_wait').hidden = true
   document.getElementById('graph_div').hidden = false
+  document.getElementById('date_pickers').hidden = false
   plot2bars(
     unpack(data, 0), // park
     'Scan Speed (files/s)',
@@ -406,6 +407,7 @@ function plot2 (data) {
 function plot3 (data) {
   document.getElementById('graph_wait').hidden = true
   document.getElementById('graph_div').hidden = false
+  document.getElementById('date_pickers').hidden = false
   plot2bars(
     unpack(data, 0), // park
     'Copy Speed (kB/s)',
@@ -480,6 +482,7 @@ function prepForNewGraph () {
   graph.hidden = true
   document.getElementById('graph_fail').hidden = true
   document.getElementById('park_picker').hidden = true
+  document.getElementById('date_pickers').hidden = true
   document.getElementById('graph_wait').hidden = false
   while (graph.firstChild) {
     graph.removeChild(graph.firstChild)
@@ -497,23 +500,38 @@ function plotParks1 () {
 // eslint-disable-next-line no-unused-vars
 function plotParks2 () {
   prepForNewGraph()
-  document.getElementById('graph_fail').hidden = true
-  const url = dataServer + '/scanavg?date=2018-09-01'
+  const element = document.getElementById('date_pickers')
+  element.removeEventListener('change', refreshPlot3)
+  element.addEventListener('change', refreshPlot2)
+  refreshPlot2()
+}
+
+function refreshPlot2 () {
+  const date1 = document.getElementById('start_date').value
+  const date2 = document.getElementById('end_date').value
+  const url = dataServer + '/scanavg?date=' + date1
   getJSON(url, plot2, getPlotDataFail)
 }
 
 // eslint-disable-next-line no-unused-vars
 function plotParks3 () {
   prepForNewGraph()
-  document.getElementById('graph_fail').hidden = true
-  const url = dataServer + '/copyavg?date=2018-09-01'
+  const element = document.getElementById('date_pickers')
+  element.removeEventListener('change', refreshPlot2)
+  element.addEventListener('change', refreshPlot3)
+  refreshPlot3()
+}
+
+function refreshPlot3 () {
+  const date1 = document.getElementById('start_date').value
+  const date2 = document.getElementById('end_date').value
+  const url = dataServer + '/copyavg?date=' + date1
   getJSON(url, plot3, getPlotDataFail)
 }
 
 // eslint-disable-next-line no-unused-vars
 function plotParks4 () {
   prepForNewGraph()
-  document.getElementById('graph_fail').hidden = true
   const element = document.getElementById('park_select')
   element.removeEventListener('change', refreshPlot5)
   element.addEventListener('change', refreshPlot4)
@@ -523,7 +541,7 @@ function plotParks4 () {
 function refreshPlot4 () {
   const date = document.getElementById('page_date').textContent
   const park = document.getElementById('park_select').value
-  const url = dataServer + '/speed?park=' + park + '&start=2018-09-01&end=' + date
+  const url = dataServer + '/speed?park=' + park + '&start=2018-01-22&end=' + date
   getJSON(url, plot4, getPlotDataFail)
 }
 
@@ -533,14 +551,13 @@ function plotParks5 () {
   const element = document.getElementById('park_select')
   element.removeEventListener('change', refreshPlot4)
   element.addEventListener('change', refreshPlot5)
-  document.getElementById('graph_fail').hidden = true
   refreshPlot5()
 }
 
 function refreshPlot5 () {
   const date = document.getElementById('page_date').textContent
   const park = document.getElementById('park_select').value
-  const url = dataServer + '/speed?park=' + park + '&start=2018-09-01&end=' + date
+  const url = dataServer + '/speed?park=' + park + '&start=2018-01-22&end=' + date
   getJSON(url, plot5, getPlotDataFail)
 }
 
@@ -563,6 +580,14 @@ function setupPage (date) {
 function setupSite () {
   const lastNight = getYesterday()
   const firstNight = '2018-01-22'
+  const startDatePicker = document.getElementById('start_date')
+  startDatePicker.min = firstNight
+  startDatePicker.max = lastNight
+  startDatePicker.value = firstNight
+  const endDatePicker = document.getElementById('end_date')
+  endDatePicker.min = firstNight
+  endDatePicker.max = lastNight
+  endDatePicker.value = lastNight
   document.getElementById('previous_date').dataset.limit = firstNight
   document.getElementById('next_date').dataset.limit = lastNight
   const params = new URLSearchParams(document.location.search.substring(1))
