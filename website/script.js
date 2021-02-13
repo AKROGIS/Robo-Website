@@ -353,7 +353,7 @@ function plot2bars (x, l1, y1, l2, y2, title) {
   Plotly.newPlot('graph_div', [trace1, trace2], layout)
 }
 
-function plot2lines (x, l1, y1, l2, y2, title) {
+function plotline (x, l1, y1, title) {
   const trace1 = {
     x: x,
     y: y1,
@@ -361,17 +361,10 @@ function plot2lines (x, l1, y1, l2, y2, title) {
     type: 'scatter',
     mode: 'lines'
   }
-  const trace2 = {
-    x: x,
-    y: y2,
-    name: l2,
-    type: 'scatter',
-    mode: 'lines'
-  }
   const layout = {
     title: title
   }
-  Plotly.newPlot('graph_div', [trace1, trace2], layout)
+  Plotly.newPlot('graph_div', [trace1], layout)
 }
 
 function plot5lines (x, l1, y1, l2, y2, l3, y3, l4, y4, l5, y5, title) {
@@ -448,7 +441,7 @@ function plot2 (data) {
     unpack(data, 1), // avg scan speed
     '# of days',
     unpack(data, 2), // # of days
-    'Average Scan Speed by Park (last 90 days)'
+    'Average Scan Speed by Park (since 2018-09-01)'
   )
 }
 
@@ -461,7 +454,7 @@ function plot3 (data) {
     unpack(data, 1), // avg copy speed
     '# of days',
     unpack(data, 2), // # of days
-    'Average Copy Speed by Park (last 90 days)'
+    'Average Copy Speed by Park (Since 2018-09-01)'
   )
 }
 
@@ -470,13 +463,11 @@ function plot4 (data) {
   document.getElementById('graph_div').hidden = false
   const park = data[0][0]
   const title = 'Historic Speeds for ' + park
-  plot2lines(
+  plotline(
     // data 0 has the park name
     unpack(data, 1),
     'Scan Speed (files/s)',
     unpack(data, 2),
-    'Copy Speed (kB/s)',
-    unpack(data, 3),
     title
   )
 }
@@ -572,7 +563,9 @@ function plotParks3 () {
 function plotParks4 () {
   prepForNewGraph()
   document.getElementById('graph_fail').hidden = true
-  const url = dataServer + '/speed?park=YUGA&start=2018-07-01&end=2018-11-01'
+  const date = document.getElementById('page_date').textContent
+  const park = 'GLBA'
+  const url = dataServer + '/speed?park=' + park + '&start=2018-09-01&end=' + date
   getJSON(url, plot4, getPlotDataFail)
 }
 
@@ -580,7 +573,9 @@ function plotParks4 () {
 function plotParks5 () {
   prepForNewGraph()
   document.getElementById('graph_fail').hidden = true
-  const url = dataServer + '/speed?park=YUGA&start=2018-07-01&end=2018-11-01'
+  const date = document.getElementById('page_date').textContent
+  const park = 'GLBA'
+  const url = dataServer + '/speed?park=' + park + '&start=2018-09-01&end=' + date
   getJSON(url, plot5, getPlotDataFail)
 }
 
