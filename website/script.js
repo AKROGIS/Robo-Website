@@ -400,7 +400,7 @@ function plot2 (data) {
     unpack(data, 1), // avg scan speed
     '# of days',
     unpack(data, 2), // # of days
-    'Average Scan Speed by Park (since 2018-09-01)'
+    'Average Scan Speed'
   )
 }
 
@@ -414,7 +414,7 @@ function plot3 (data) {
     unpack(data, 1), // avg copy speed
     '# of days',
     unpack(data, 2), // # of days
-    'Average Copy Speed by Park (Since 2018-09-01)'
+    'Average Copy Speed'
   )
 }
 
