@@ -461,8 +461,9 @@ function plot3 (data) {
 function plot4 (data) {
   document.getElementById('graph_wait').hidden = true
   document.getElementById('graph_div').hidden = false
+  document.getElementById('park_picker').hidden = false
   const park = data[0][0]
-  const title = 'Historic Speeds for ' + park
+  const title = 'Scan Speed (files/second) for ' + park
   plotline(
     // data 0 has the park name
     unpack(data, 1),
@@ -475,6 +476,7 @@ function plot4 (data) {
 function plot5 (data) {
   document.getElementById('graph_wait').hidden = true
   document.getElementById('graph_div').hidden = false
+  document.getElementById('park_picker').hidden = false
   const park = data[0][0]
   const title = 'Historic speeds for ' + park
   plot5lines(
@@ -529,6 +531,7 @@ function prepForNewGraph () {
   const graph = document.getElementById('graph_div')
   graph.hidden = true
   document.getElementById('graph_fail').hidden = true
+  document.getElementById('park_picker').hidden = true
   document.getElementById('graph_wait').hidden = false
   while (graph.firstChild) {
     graph.removeChild(graph.firstChild)
@@ -564,7 +567,7 @@ function plotParks4 () {
   prepForNewGraph()
   document.getElementById('graph_fail').hidden = true
   const date = document.getElementById('page_date').textContent
-  const park = 'GLBA'
+  const park = document.getElementById('park_select').value
   const url = dataServer + '/speed?park=' + park + '&start=2018-09-01&end=' + date
   getJSON(url, plot4, getPlotDataFail)
 }
@@ -574,7 +577,7 @@ function plotParks5 () {
   prepForNewGraph()
   document.getElementById('graph_fail').hidden = true
   const date = document.getElementById('page_date').textContent
-  const park = 'GLBA'
+  const park = document.getElementById('park_select').value
   const url = dataServer + '/speed?park=' + park + '&start=2018-09-01&end=' + date
   getJSON(url, plot5, getPlotDataFail)
 }
