@@ -513,6 +513,9 @@ function plotParks2 () {
 }
 
 function refreshPlot2 () {
+  if (!document.getElementById('graph_fail').hidden) {
+    prepForNewGraph()
+  }
   const date1 = document.getElementById('start_date').value
   const date2 = document.getElementById('end_date').value
   // ignore bad (usually inprogress) dates in the pickers
@@ -533,6 +536,9 @@ function plotParks3 () {
 }
 
 function refreshPlot3 () {
+  if (!document.getElementById('graph_fail').hidden) {
+    prepForNewGraph()
+  }
   const date1 = document.getElementById('start_date').value
   const date2 = document.getElementById('end_date').value
   // ignore bad (usually inprogress) dates in the pickers
@@ -553,6 +559,9 @@ function plotParks4 () {
 }
 
 function refreshPlot4 () {
+  if (!document.getElementById('graph_fail').hidden) {
+    prepForNewGraph()
+  }
   const date = document.getElementById('page_date').textContent
   const park = document.getElementById('park_select').value
   const url = dataServer + '/speed?park=' + park + '&start=2018-01-22&end=' + date
@@ -569,6 +578,9 @@ function plotParks5 () {
 }
 
 function refreshPlot5 () {
+  if (!document.getElementById('graph_fail').hidden) {
+    prepForNewGraph()
+  }
   const date = document.getElementById('page_date').textContent
   const park = document.getElementById('park_select').value
   const url = dataServer + '/speed?park=' + park + '&start=2018-01-22&end=' + date
