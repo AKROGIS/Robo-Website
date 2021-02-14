@@ -281,19 +281,30 @@ class SyncHandler(BaseHTTPRequestHandler):
                 WHERE e.log_id IS NULL
                 AND st.extra > 0 AND sf.total > 0
                 AND l.date > ?
+                AND l.date < ?
                 GROUP BY l.park
                 ORDER BY l.park;
             """
-            if "date" in params and len(params["date"]) == 1:
-                date = params["date"][0]
+            if "start" in params and len(params["start"]) == 1:
+                date = params["start"][0]
                 date = self.sanitize_date(date)
                 if date:
-                    sql_params = [date]
+                    sql_params.append(date)
                 else:
-                    self.err_response("Bad date request")
+                    self.err_response("Bad start date parameter")
                     return
             else:
                 sql = sql.replace("AND l.date > ?", "")
+            if "end" in params and len(params["end"]) == 1:
+                date = params["end"][0]
+                date = self.sanitize_date(date)
+                if date:
+                    sql_params.append(date)
+                else:
+                    self.err_response("Bad end date parameter")
+                    return
+            else:
+                sql = sql.replace("AND l.date < ?", "")
             with sqlite3.connect(self.db_name) as database:
                 try:
                     resp = self.db_get_rows(database, sql, sql_params, False)
@@ -313,19 +324,30 @@ class SyncHandler(BaseHTTPRequestHandler):
                 WHERE e.log_id IS NULL
                 AND st.copied > 0 AND sb.copied > 0
                 AND l.date > ?
+                AND l.date < ?
                 GROUP BY l.park
                 ORDER BY l.park;
             """
-            if "date" in params and len(params["date"]) == 1:
-                date = params["date"][0]
+            if "start" in params and len(params["start"]) == 1:
+                date = params["start"][0]
                 date = self.sanitize_date(date)
                 if date:
-                    sql_params = [date]
+                    sql_params.append(date)
                 else:
-                    self.err_response("Bad date request")
+                    self.err_response("Bad start date parameter")
                     return
             else:
                 sql = sql.replace("AND l.date > ?", "")
+            if "end" in params and len(params["end"]) == 1:
+                date = params["end"][0]
+                date = self.sanitize_date(date)
+                if date:
+                    sql_params.append(date)
+                else:
+                    self.err_response("Bad end date parameter")
+                    return
+            else:
+                sql = sql.replace("AND l.date < ?", "")
             with sqlite3.connect(self.db_name) as database:
                 try:
                     resp = self.db_get_rows(database, sql, sql_params, False)
