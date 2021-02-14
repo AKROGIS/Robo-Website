@@ -509,7 +509,7 @@ function plotParks2 () {
 function refreshPlot2 () {
   const date1 = document.getElementById('start_date').value
   const date2 = document.getElementById('end_date').value
-  const url = dataServer + '/scanavg?date=' + date1
+  const url = dataServer + '/scanavg?start=' + date1 + '&end=' + date2
   getJSON(url, plot2, getPlotDataFail)
 }
 
@@ -525,7 +525,7 @@ function plotParks3 () {
 function refreshPlot3 () {
   const date1 = document.getElementById('start_date').value
   const date2 = document.getElementById('end_date').value
-  const url = dataServer + '/copyavg?date=' + date1
+  const url = dataServer + '/copyavg?start=' + date1 + '&end=' + date2
   getJSON(url, plot3, getPlotDataFail)
 }
 
