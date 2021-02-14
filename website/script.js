@@ -76,12 +76,11 @@ function isoDateFormat (dateObj) {
   )
 }
 
-// Produce a date object from a short ISO formatted date
+// Returns a Date() obj if valid, false otherwise
 // It is flexible in that zero padding is not required, and month/day default to Jan/1
-// an invalid date will result in today's date being returned
-function dateFromIso (str) {
+function validIsoDate (str) {
   if (!str) {
-    return new Date()
+    return false
   }
   try {
     const parts = str.split('-')
@@ -92,11 +91,18 @@ function dateFromIso (str) {
     if (dateObj instanceof Date && !isNaN(dateObj)) {
       return dateObj
     } else {
-      return new Date()
+      return false
     }
   } catch (error) {
-    return new Date()
+    return false
   }
+}
+
+// Produce a date object from a short ISO formatted date
+// It is flexible in that zero padding is not required, and month/day default to Jan/1
+// an invalid date will result in today's date being returned
+function dateFromIso (str) {
+  return validIsoDate(str) || new Date()
 }
 
 // Validate a user provided iso date string
@@ -509,6 +515,10 @@ function plotParks2 () {
 function refreshPlot2 () {
   const date1 = document.getElementById('start_date').value
   const date2 = document.getElementById('end_date').value
+  // ignore bad (usually inprogress) dates in the pickers
+  if (!date1 || !date2) {
+    return
+  }
   const url = dataServer + '/scanavg?start=' + date1 + '&end=' + date2
   getJSON(url, plot2, getPlotDataFail)
 }
@@ -525,6 +535,10 @@ function plotParks3 () {
 function refreshPlot3 () {
   const date1 = document.getElementById('start_date').value
   const date2 = document.getElementById('end_date').value
+  // ignore bad (usually inprogress) dates in the pickers
+  if (!date1 || !date2) {
+    return
+  }
   const url = dataServer + '/copyavg?start=' + date1 + '&end=' + date2
   getJSON(url, plot3, getPlotDataFail)
 }
