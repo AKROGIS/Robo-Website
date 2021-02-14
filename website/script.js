@@ -386,13 +386,14 @@ function plot1 (data) {
   }
   document.getElementById('graph_wait').hidden = true
   document.getElementById('graph_div').hidden = false
+  const date = document.getElementById('page_date').textContent
   plot2bars(
     unpack(data, 0), // park
     'Copy Speed (kB/s)',
     unpack(data, 2), // copySpeed
     'Scan Speed (files/s)',
     unpack(data, 1), // scanSpeed
-    'Park Speed Comparison (single night)'
+    'Park Speed Comparison on ' + date
   )
 }
 
@@ -463,6 +464,22 @@ function getPlotDataFail (err) {
   document.getElementById('graph_wait').hidden = true
 }
 
+function plot1IsShowing () {
+  return (
+    !document.getElementById('graph_div').hidden &&
+    document.getElementById('park_picker').hidden &&
+    document.getElementById('date_pickers').hidden
+  )
+}
+
+function optionalRefreshPlot1 () {
+  // Plot1 is dependent on the current date
+  // If it is showing, then we refresh it.
+  if (plot1IsShowing()) {
+    refreshPlot1()
+  }
+}
+
 // ===========
 // DOM Events
 // ===========
@@ -498,6 +515,14 @@ function prepForNewGraph () {
 // eslint-disable-next-line no-unused-vars
 function plotParks1 () {
   prepForNewGraph()
+  refreshPlot1()
+}
+
+function refreshPlot1 () {
+  if (!document.getElementById('graph_fail').hidden) {
+    document.getElementById('graph_fail').hidden = true
+  }
+  document.getElementById('graph_wait').hidden = false
   const date = document.getElementById('page_date').textContent
   const url = dataServer + '/plot1?date=' + date
   getJSON(url, plot1, getPlotDataFail)
@@ -604,6 +629,7 @@ function setupPage (date) {
   document.getElementById('park_cards').hidden = true
   document.getElementById('park_fail').hidden = true
   getJSON(dataServer + '/parks' + query, postParkDetails, parksFailed)
+  optionalRefreshPlot1()
 }
 
 // Get data from the services and update the page
