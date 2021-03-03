@@ -3,6 +3,8 @@
 An HTTP server which publishes stats about the robocopy logs database.
 
 Edit the Config object below as needed for each execution.
+
+Works with Python 2.7 and Python 3.x
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -420,6 +422,12 @@ class SyncHandler(BaseHTTPRequestHandler):
         """respond with a JSON (obj) object."""
 
         data = json.dumps(obj)
+        # Python 2 with no unicode text in JSON object will return a byte string
+        # otherwise data will be unicode which needs to be encoded to bytes
+        try:
+            data = data.encode("utf8")
+        except AttributeError:
+            pass
         self.send_response(200)
         self.send_header("Content-type", "json")
         self.send_header("Content-length", len(data))
@@ -442,7 +450,7 @@ class SyncHandler(BaseHTTPRequestHandler):
     def err_response(self, message):
         """Respond with an error message."""
 
-        data = json.dumps({"error": message})
+        data = json.dumps({"error": message}).encode("utf8")
         self.send_response(500)
         self.send_header("Content-type", "json")
         self.send_header("Content-length", len(data))
