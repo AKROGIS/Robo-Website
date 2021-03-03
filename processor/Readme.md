@@ -3,15 +3,15 @@
 This process is intended to be run as scheduled task to
 summarize the several nightly robocopy log files into a database.
 
-## `BufferingSMTPHandler.py`
+## `buffering_smtp_handler.py`
 
-A python 2.7 file to provide the logging service with the
+A python 2/3 file to provide the logging service with the
 ability to bundle multiple log messages into a single email.
 `import`ed by `config_logger.py`
 
 ## `config_logger.py`
 
-A python 2.7 file with a log configuration object that defines the how log
+A python 2/3 file with a log configuration object that defines the how log
 messages are formatted and where the messages at various log levels are written.
 The logs can be written to the console (not useful for a scheduled task),
 as well as a log file, email server, or database.  This file can be edited
@@ -20,7 +20,7 @@ edited if the path or name of the database or log file is changed.
 
 ## `process_robo_logs_tests.py`
 
-A python 2.7 file that was useful during development to test
+A python 2/3 file that was useful during development to test
 the structure of the log files and to ensure that all the
 possible errors and formats of the log files could be captured
 correctly. It contains a lot of notes about the format and structure
@@ -29,7 +29,7 @@ helpful if a new version of robocopy changes the format of the log file.
 
 ## `process_robo_logs.py`
 
-A python 2.7 file that reads unprocessed logs in the
+A python 2/3 file that reads unprocessed logs in the
 [log folder](https://github.com/AKROGIS/Robo-Website/blob/master/processor/process_robo_logs.py#L16)
 and the
 [PDS change log](https://github.com/AKROGIS/Robo-Website/blob/master/processor/process_robo_logs.py#L17)
@@ -50,9 +50,9 @@ It is possible to use this script to clean the database (i.e. create a new
 empty database), and reprocess all log files.  This shouldn't be required,
 so details are not provided.  If needed, see the script for details.
 
-## `SQLiteHandler.py`
+## `sqlite_handler.py`
 
-A python 2.7 file to provide the logging service with the
+A python 2/3 file to provide the logging service with the
 ability to write logs to a sqlite3 database.
 `import`ed by `config_logger.py`
 
