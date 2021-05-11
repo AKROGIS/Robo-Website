@@ -683,7 +683,7 @@ def get_changes(db_name):
                 date = previous_line[:10]
                 if max_db_date is None or date > max_db_date:
                     # add a single element tuple to the list (for the db parameter substitution)
-                    dates.append(date)
+                    dates.append((date,))
                 if max_db_date is not None and date <= max_db_date:
                     break
             previous_line = line
