@@ -649,8 +649,65 @@ def clean_folder(folder):
             )
 
 
+def get_dates_from(change_log, since):
+    """Open `change_log` and return a list of all dates greater than `since`.
+
+    `change_log` is a file path to a change log file as described below.
+    `since` must be a date string or None.
+
+    `since` and dates in the `change_log` are 10 character strings in the format
+    YYYY-MM-DD.
+
+    It is assumed that:
+    1) Change log dates are on a line all by themselves, followed by a line with
+       exactly 10 dashes ("----------")
+    2) Changes always go at the top of the file (newest on top), therefore we
+       can stop scanning as soon as we see a date before `since`.
+    3) Change log dates are in the past (a future date is logged as an error and
+       ignored).
+
+    Log an error and return none if an invalid or future date is found,
+    otherwise return a list of all dates greater than `since`.
+    """
+
+    def real_date(text):
+        try:
+            datetime.date(int(text[:4]), int(text[5:7]), int(text[8:10]))
+        except ValueError:
+            return False
+        return True
+
+    dates = []
+    today = datetime.date.today().isoformat()
+    with open(change_log, "r", encoding="utf-8") as file_handle:
+        previous_line = file_handle.readline()
+        for line in file_handle:
+            if line.strip() == "----------":
+                date = previous_line[:10]
+                if not real_date(date):
+                    logger.error("Date (%s) is not a valid date.", date)
+                    return None
+                if date > today:
+                    msg = "Change dates in the future (%s) are not allowed."
+                    logger.error(msg, date)
+                    return None
+                if since is None or date > since:
+                    # add a single element tuple to the list (for the db parameter substitution)
+                    dates.append((date,))
+                if since is not None and date <= since:
+                    break
+            previous_line = line
+    return dates
+
+
 def get_changes(db_name):
-    """Determine the data of the last PDS change and write to the database."""
+    """Find new dates in the change log and write them to the database.
+
+    Dates in the database, and dates in the changelog are 10 character strings
+    in the format YYYY-MM-DD. This will add all dates in the change log that
+    occur before the first date found that is before the newest date in the
+    database.
+    """
 
     change_log = Config.change_log_path
     if not os.path.exists(change_log):
@@ -666,7 +723,7 @@ def get_changes(db_name):
         )
     unix_timestamp = os.path.getmtime(change_log)
     file_date = datetime.datetime.fromtimestamp(unix_timestamp).isoformat()[:10]
-    if file_date <= max_db_date:
+    if max_db_date is not None and file_date <= max_db_date:
         logger.info(
             "Changelog file date %s is not newer than the most recent change in the datebase %s",
             file_date,
@@ -675,18 +732,15 @@ def get_changes(db_name):
         return
     if max_db_date is None:
         logger.info("No change dates in the datebase, reading entire change log.")
-    dates = []
-    with open(change_log, "r", encoding="utf-8") as file_handle:
-        previous_line = file_handle.readline()
-        for line in file_handle:
-            if line.strip() == "----------":
-                date = previous_line[:10]
-                if max_db_date is None or date > max_db_date:
-                    # add a single element tuple to the list (for the db parameter substitution)
-                    dates.append((date,))
-                if max_db_date is not None and date <= max_db_date:
-                    break
-            previous_line = line
+    dates = get_dates_from(change_log, max_db_date)
+    if dates is None:
+        # error in change log was logged
+        return
+    if not dates:
+        # no errors, but also no dates newer than database
+        msg = "Change log was modified, but no new changes found. Check the change log."
+        logger.error(msg)
+        return
     dates.sort()
     with sqlite3.connect(db_name) as conn:
         try:
